@@ -14,9 +14,12 @@ local fonts = {}
 local cursor = {
     area = "stock", -- "stock","waste","foundation","tableau"
     index = 1, -- for foundation (1..4) or tableau (1..7)
+    -- when area == "tableau", cardIndex is the index among face-up cards (1..nFaceUp).
+    -- If cardIndex == 0, there are no face-up cards in that pile (navigation ignores them).
+    cardIndex = 0,
 }
 
-local selected = nil -- { pileType="tableau"/"foundation"/"waste", index=..., cards={...} }
+local selected = nil -- { pileType="tableau"/"foundation"/"waste", index=..., cards={...}, absIndex=... }
 
 local function newGame()
     -- create deck, shuffle, deal
@@ -57,6 +60,7 @@ local function newGame()
 
     cursor.area = "stock"
     cursor.index = 1
+    cursor.cardIndex = 0
     selected = nil
 end
 
@@ -105,23 +109,59 @@ local function canMoveToFoundation(card, foundationPile)
     end
 end
 
+-- Helpers to work with face-up ranges
+local function firstFaceUpIndex(pile)
+    for i = 1, #pile do
+        if pile[i].faceUp then
+            return i
+        end
+    end
+    return nil
+end
+
+local function faceUpCount(pile)
+    local first = firstFaceUpIndex(pile)
+    if not first then return 0 end
+    return #pile - first + 1
+end
+
+-- Convert a face-up position (1..nFaceUp) to the absolute pile index.
+-- Returns nil if invalid or no face-up cards.
+local function faceUpPosToAbsolute(pile, pos)
+    local first = firstFaceUpIndex(pile)
+    if not first then return nil end
+    if pos < 1 then return nil end
+    local abs = first + pos - 1
+    if abs > #pile then return nil end
+    return abs
+end
+
 -- NOTE: pickupFromPile no longer flips the new top card on the origin pile.
 -- Flipping will only occur after a successful placement.
-local function pickupFromPile(area, idx)
+-- Supports selecting a sub-sequence in tableau by providing faceUpPos.
+local function pickupFromPile(area, idx, faceUpPos)
     if area == "tableau" then
         local pile = state.tableau[idx]
-        -- pick up the top face-up sequence
+        if #pile == 0 then return nil end
+        local nFaceUp = faceUpCount(pile)
+        if nFaceUp == 0 then return nil end
+        -- faceUpPos defaults to topmost face-up card (nFaceUp)
+        faceUpPos = faceUpPos or nFaceUp
+        local absIndex = faceUpPosToAbsolute(pile, faceUpPos)
+        if not absIndex then return nil end
+        -- ensure the targeted card is faceUp (it should be by construction)
+        if not pile[absIndex].faceUp then return nil end
+        -- pick up the sequence from absIndex .. #pile
         local seq = {}
-        local i = #pile
-        while i >= 1 and pile[i].faceUp do
-            table.insert(seq, 1, pile[i])
-            i = i - 1
+        for i = absIndex, #pile do
+            table.insert(seq, pile[i])
         end
-        if #seq == 0 then return nil end
-        -- remove them
-        for _=1,#seq do table.remove(pile) end
-        -- DO NOT flip the new top here; flip only when placement is confirmed.
-        return {pileType="tableau", index=idx, cards=seq}
+        -- remove them from the pile (from the end)
+        for _ = 1, #seq do
+            table.remove(pile)
+        end
+        -- return pickup with absolute index so placement/flip logic can reference the origin
+        return {pileType="tableau", index=idx, cards=seq, absIndex=absIndex}
     elseif area == "waste" then
         local pile = state.waste
         if #pile == 0 then return nil end
@@ -237,6 +277,13 @@ function love.keypressed(key)
     if Input.is("left", key) then
         if cursor.area == "tableau" then
             cursor.index = math.max(1, cursor.index - 1)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 then
+                cursor.cardIndex = 0
+            else
+                cursor.cardIndex = math.min(cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp, nFaceUp)
+            end
         else
             -- move left in top row (stock->waste->foundations)
             if cursor.area == "foundation" then
@@ -256,6 +303,13 @@ function love.keypressed(key)
     elseif Input.is("right", key) then
         if cursor.area == "tableau" then
             cursor.index = math.min(7, cursor.index + 1)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 then
+                cursor.cardIndex = 0
+            else
+                cursor.cardIndex = math.min(cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp, nFaceUp)
+            end
         else
             if cursor.area == "stock" then
                 cursor.area = "waste"
@@ -267,20 +321,39 @@ function love.keypressed(key)
             end
         end
     elseif Input.is("down", key) then
-        -- move to tableau
         if cursor.area == "tableau" then
-            -- move down a row? nothing
+            -- move cursor "down" among face-up cards (toward deeper / later cards)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp > 0 then
+                cursor.cardIndex = math.min(nFaceUp, (cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp) + 1)
+            end
         else
+            -- move to tableau: set cardIndex to topmost face-up card (nFaceUp) or 0 if none
             cursor.area = "tableau"
             cursor.index = 1
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            cursor.cardIndex = nFaceUp > 0 and nFaceUp or 0
         end
     elseif Input.is("up", key) then
         if cursor.area == "tableau" then
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 or cursor.cardIndex <= 1 then
+                -- either no face-up cards or already at the topmost face-up: go to top row (stock)
+                cursor.area = "stock"
+                cursor.index = 1
+                cursor.cardIndex = 0
+            else
+                -- move cursor "up" among face-up cards (toward earlier face-up)
+                cursor.cardIndex = math.max(1, cursor.cardIndex - 1)
+            end
+        else
+            -- move focus back to stock when up from top row
             cursor.area = "stock"
             cursor.index = 1
-        elseif cursor.area == "foundation" or cursor.area == "waste" then
-            cursor.area = "stock"
-            cursor.index = 1
+            cursor.cardIndex = 0
         end
     elseif Input.is("select", key) then
         if selected then
@@ -297,8 +370,19 @@ function love.keypressed(key)
             selected = nil
         else
             -- pick up from current cursor
-            local p = pickupFromPile(cursor.area, cursor.index)
-            if p then selected = p end
+            if cursor.area == "tableau" then
+                local pile = state.tableau[cursor.index]
+                local nFaceUp = faceUpCount(pile)
+                if nFaceUp == 0 then
+                    -- nothing selectable in this pile (face-down only)
+                    return
+                end
+                local p = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
+                if p then selected = p end
+            else
+                local p = pickupFromPile(cursor.area, cursor.index)
+                if p then selected = p end
+            end
         end
     elseif Input.is("move", key) then
         if selected then
@@ -324,8 +408,11 @@ function love.keypressed(key)
             if cursor.area == "stock" then
                 drawFromStock()
             elseif cursor.area == "tableau" then
-                -- pick up and attempt auto to foundation
-                local p = pickupFromPile("tableau", cursor.index)
+                -- pick up from the current face-up cursor.cardIndex and attempt auto to foundation if single card
+                local pile = state.tableau[cursor.index]
+                local nFaceUp = faceUpCount(pile)
+                if nFaceUp == 0 then return end
+                local p = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
                 if p and #p.cards == 1 then
                     local card = p.cards[1]
                     -- try each foundation
@@ -452,11 +539,10 @@ function love.draw()
     for i=1,7 do
         local tx, ty = cursorToXY("tableau", i)
         local pile = state.tableau[i]
-        local y = ty
         if #pile == 0 then
             love.graphics.setColor(0.18,0.18,0.18)
             love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
-            drawTextCentered("Empty", tx, ty+CARD_H/2-8, CARD_W)
+            drawTextCentered("Empty", tx, ty+CARD_W/2-8, CARD_W)
         else
             for j=1,#pile do
                 local c = pile[j]
@@ -464,9 +550,23 @@ function love.draw()
                 c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
             end
         end
+
+        -- highlight entire pile when cursor over it
         if cursor.area == "tableau" and cursor.index == i then
-            love.graphics.setColor(1,1,0,0.9)
+            love.graphics.setColor(1,1,0,0.3)
             love.graphics.rectangle("line", tx-4, ty-4, CARD_W+8, CARD_H+8 + math.max(0,(#pile-1)*20), 8)
+
+            -- highlight the current targeted face-up card and cards underneath
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp > 0 and cursor.cardIndex > 0 then
+                local absIndex = faceUpPosToAbsolute(pile, cursor.cardIndex)
+                if absIndex then
+                    local startY = ty + (absIndex-1)*20
+                    local height = CARD_H + (#pile - absIndex) * 20
+                    love.graphics.setColor(1,1,0,0.9)
+                    love.graphics.rectangle("line", tx-4, startY-4, CARD_W+8, height+8, 8)
+                end
+            end
         end
     end
 
@@ -486,5 +586,5 @@ function love.draw()
     -- small instructions
     love.graphics.setFont(fonts.small)
     love.graphics.setColor(1,1,1)
-    love.graphics.print("Controls: h/j/k/l or arrows to move • Space select/deselect • Enter/m to move/draw • r restart • f autofound", UI_LEFT, love.graphics.getHeight()-20)
+    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down (on tableau) cycle face-up cards; Up at topmost face-up moves to top row • Space select/deselect • Enter/m to move/draw • r restart • f autofound", UI_LEFT, love.graphics.getHeight()-20)
 end
