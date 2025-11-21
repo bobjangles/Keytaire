@@ -105,6 +105,8 @@ local function canMoveToFoundation(card, foundationPile)
     end
 end
 
+-- NOTE: pickupFromPile no longer flips the new top card on the origin pile.
+-- Flipping will only occur after a successful placement.
 local function pickupFromPile(area, idx)
     if area == "tableau" then
         local pile = state.tableau[idx]
@@ -118,10 +120,7 @@ local function pickupFromPile(area, idx)
         if #seq == 0 then return nil end
         -- remove them
         for _=1,#seq do table.remove(pile) end
-        -- if new top exists and is face-down, flip it
-        if #pile > 0 and not pile[#pile].faceUp then
-            pile[#pile].faceUp = true
-        end
+        -- DO NOT flip the new top here; flip only when placement is confirmed.
         return {pileType="tableau", index=idx, cards=seq}
     elseif area == "waste" then
         local pile = state.waste
@@ -140,6 +139,16 @@ local function pickupFromPile(area, idx)
     return nil
 end
 
+-- Helper to flip the new top card of an origin tableau after a successful move.
+local function flipOriginIfNeeded(pickup)
+    if pickup and pickup.pileType == "tableau" then
+        local origin = state.tableau[pickup.index]
+        if #origin > 0 and not origin[#origin].faceUp then
+            origin[#origin].faceUp = true
+        end
+    end
+end
+
 local function placeOntoPile(area, idx, pickup)
     if not pickup or #pickup.cards == 0 then return false end
     if area == "tableau" then
@@ -148,6 +157,8 @@ local function placeOntoPile(area, idx, pickup)
             for _,c in ipairs(pickup.cards) do
                 table.insert(dest, c)
             end
+            -- successful placement: flip origin top if it was a tableau pickup
+            flipOriginIfNeeded(pickup)
             return true
         end
     elseif area == "foundation" then
@@ -155,6 +166,8 @@ local function placeOntoPile(area, idx, pickup)
         local dest = state.foundations[idx]
         if canMoveToFoundation(pickup.cards[1], dest) then
             table.insert(dest, pickup.cards[1])
+            -- successful placement: flip origin top if it was a tableau pickup
+            flipOriginIfNeeded(pickup)
             return true
         end
     elseif area == "waste" then
@@ -202,6 +215,21 @@ local function cursorToXY(a, i)
         local startY = UI_TOP + CARD_H + 60
         local startX = UI_LEFT
         return startX + (i-1)*(CARD_W + TABLEAU_SPACING), startY, CARD_W, CARD_H
+    end
+end
+
+-- draw selected cards in the bottom-left of the screen
+local function drawSelectedAtBottomLeft()
+    if not selected then return end
+    local x = UI_LEFT
+    local margin_bottom = 20
+    local screen_h = love.graphics.getHeight()
+    -- start so cards sit above the bottom margin
+    local start_y = screen_h - CARD_H - margin_bottom
+    for i=1,#selected.cards do
+        local c = selected.cards[i]
+        local drawY = start_y + (i-1)*20
+        c:draw(x, drawY, CARD_W, CARD_H, fonts.small)
     end
 end
 
@@ -313,7 +341,8 @@ function love.keypressed(key)
                         -- put back
                         for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
                     else
-                        -- flipped in pickup already handled
+                        -- successful placement: flip origin top if needed
+                        flipOriginIfNeeded(p)
                     end
                 elseif p then
                     -- put back
@@ -352,6 +381,8 @@ function love.keypressed(key)
             for i=1,4 do
                 if canMoveToFoundation(card, state.foundations[i]) then
                     table.insert(state.foundations[i], card)
+                    -- successful placement: flip origin top if needed
+                    flipOriginIfNeeded(selected)
                     selected = nil
                     return
                 end
@@ -375,7 +406,7 @@ function love.draw()
     else
         love.graphics.setColor(0.2,0.2,0.2)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
-        drawTextCentered("Empty", sx, sy+CARD_W/2-8, CARD_W)
+        drawTextCentered("Empty", sx, sy+CARD_H/2-8, CARD_W)
     end
     -- highlight cursor
     if cursor.area == "stock" then
@@ -439,10 +470,17 @@ function love.draw()
         end
     end
 
-    -- Draw selected cards near cursor bottom-left
+    -- Draw selected cards in bottom-left
     if selected then
-        love.graphics.setColor(0,0,0,0.6)
-        love.graphics.print("Selected: "..#selected.cards.." card(s)", UI_LEFT, love.graphics.getHeight()-40)
+        -- small label above the drawn stack
+        local sx = UI_LEFT
+        local margin_bottom = 20
+        local screen_h = love.graphics.getHeight()
+        local start_y = screen_h - CARD_H - margin_bottom
+        love.graphics.setFont(fonts.small)
+        love.graphics.setColor(1,1,1)
+        love.graphics.print("Selected: "..#selected.cards.." card(s)", sx, start_y - 18)
+        drawSelectedAtBottomLeft()
     end
 
     -- small instructions
