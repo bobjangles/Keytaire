@@ -1,0 +1,448 @@
+
+local Deck = require "deck"
+local Card = require "card"
+local Input = require "input"
+
+local CARD_W, CARD_H = 100, 140
+local PADDING = 20
+local TABLEAU_SPACING = 30
+local UI_TOP = 20
+local UI_LEFT = 20
+
+local state = {}
+local fonts = {}
+
+local cursor = {
+    area = "stock", -- "stock","waste","foundation","tableau"
+    index = 1, -- for foundation (1..4) or tableau (1..7)
+}
+
+local selected = nil -- { pileType="tableau"/"foundation"/"waste", index=..., cards={...} }
+
+local function newGame()
+    -- create deck, shuffle, deal
+    local deck = Deck.newDeck()
+    Deck.shuffle(deck)
+
+    -- piles
+    local foundations = { {}, {}, {}, {} }
+    local tableau = {}
+    for i=1,7 do
+        tableau[i] = {}
+    end
+    local stock = {}
+    local waste = {}
+
+    -- deal to tableau: 1..7 piles, with i cards in pile i
+    for i=1,7 do
+        for j=1,i do
+            local c = table.remove(deck)
+            c.faceUp = (j == i)
+            table.insert(tableau[i], c)
+        end
+    end
+
+    -- rest to stock
+    while #deck > 0 do
+        local c = table.remove(deck)
+        c.faceUp = false
+        table.insert(stock, c)
+    end
+
+    state = {
+        stock = stock,
+        waste = waste,
+        foundations = foundations,
+        tableau = tableau,
+    }
+
+    cursor.area = "stock"
+    cursor.index = 1
+    selected = nil
+end
+
+local function drawTextCentered(text, x, y, w)
+    local font = fonts.small
+    local sw = font:getWidth(text)
+    love.graphics.setFont(font)
+    love.graphics.print(text, x + (w - sw)/2, y)
+end
+
+local function drawCardBack(x,y)
+    love.graphics.setColor(0.2,0.2,0.6)
+    love.graphics.rectangle("fill", x, y, CARD_W, CARD_H, 6)
+    love.graphics.setColor(0.15,0.15,0.4)
+    love.graphics.rectangle("line", x, y, CARD_W, CARD_H, 6)
+end
+
+local function getTopOfPile(pile)
+    return pile[#pile]
+end
+
+local function isBuildDescendingAlt(c1, c2)
+    -- c1 can be placed on c2: rank one lower and opposite color
+    if not c1 or not c2 then return false end
+    return (c1.rankIndex + 1 == c2.rankIndex) and (c1:isRed() ~= c2:isRed())
+end
+
+local function canMoveSequenceToTableau(seq, destPile)
+    if #seq == 0 then return false end
+    local top = getTopOfPile(destPile)
+    if not top then
+        -- only a King can be placed on empty
+        return seq[1].rankIndex == 13
+    else
+        return isBuildDescendingAlt(seq[1], top)
+    end
+end
+
+local function canMoveToFoundation(card, foundationPile)
+    if not card then return false end
+    local top = getTopOfPile(foundationPile)
+    if not top then
+        return card.rankIndex == 1 -- Ace
+    else
+        return (card.suit == top.suit) and (card.rankIndex == top.rankIndex + 1)
+    end
+end
+
+local function pickupFromPile(area, idx)
+    if area == "tableau" then
+        local pile = state.tableau[idx]
+        -- pick up the top face-up sequence
+        local seq = {}
+        local i = #pile
+        while i >= 1 and pile[i].faceUp do
+            table.insert(seq, 1, pile[i])
+            i = i - 1
+        end
+        if #seq == 0 then return nil end
+        -- remove them
+        for _=1,#seq do table.remove(pile) end
+        -- if new top exists and is face-down, flip it
+        if #pile > 0 and not pile[#pile].faceUp then
+            pile[#pile].faceUp = true
+        end
+        return {pileType="tableau", index=idx, cards=seq}
+    elseif area == "waste" then
+        local pile = state.waste
+        if #pile == 0 then return nil end
+        local card = table.remove(pile)
+        return {pileType="waste", index=1, cards={card}}
+    elseif area == "foundation" then
+        local pile = state.foundations[idx]
+        if #pile == 0 then return nil end
+        local card = table.remove(pile)
+        return {pileType="foundation", index=idx, cards={card}}
+    elseif area == "stock" then
+        -- no pickup; use Enter to draw
+        return nil
+    end
+    return nil
+end
+
+local function placeOntoPile(area, idx, pickup)
+    if not pickup or #pickup.cards == 0 then return false end
+    if area == "tableau" then
+        local dest = state.tableau[idx]
+        if canMoveSequenceToTableau(pickup.cards, dest) then
+            for _,c in ipairs(pickup.cards) do
+                table.insert(dest, c)
+            end
+            return true
+        end
+    elseif area == "foundation" then
+        if #pickup.cards ~= 1 then return false end
+        local dest = state.foundations[idx]
+        if canMoveToFoundation(pickup.cards[1], dest) then
+            table.insert(dest, pickup.cards[1])
+            return true
+        end
+    elseif area == "waste" then
+        -- not allowed to place onto waste
+        return false
+    elseif area == "stock" then
+        return false
+    end
+    return false
+end
+
+local function drawFromStock()
+    if #state.stock == 0 then
+        -- recycle waste back to stock
+        while #state.waste > 0 do
+            local c = table.remove(state.waste)
+            c.faceUp = false
+            table.insert(state.stock, c)
+        end
+        return
+    end
+    local c = table.remove(state.stock)
+    c.faceUp = true
+    table.insert(state.waste, c)
+end
+
+function love.load()
+    fonts.small = love.graphics.newFont(14)
+    fonts.big = love.graphics.newFont(20)
+    newGame()
+end
+
+local function cursorToXY(a, i)
+    -- return x,y for top-left of the pile for drawing and hit area
+    local W = love.graphics.getWidth()
+    -- stock and waste at left top
+    if a == "stock" then
+        return UI_LEFT, UI_TOP, CARD_W, CARD_H
+    elseif a == "waste" then
+        return UI_LEFT + CARD_W + 12, UI_TOP, CARD_W, CARD_H
+    elseif a == "foundation" then
+        local start = UI_LEFT + 350
+        return start + (i-1)*(CARD_W+12), UI_TOP, CARD_W, CARD_H
+    elseif a == "tableau" then
+        local startY = UI_TOP + CARD_H + 60
+        local startX = UI_LEFT
+        return startX + (i-1)*(CARD_W + TABLEAU_SPACING), startY, CARD_W, CARD_H
+    end
+end
+
+function love.keypressed(key)
+    if Input.is("left", key) then
+        if cursor.area == "tableau" then
+            cursor.index = math.max(1, cursor.index - 1)
+        else
+            -- move left in top row (stock->waste->foundations)
+            if cursor.area == "foundation" then
+                cursor.index = math.max(1, cursor.index - 1)
+                if cursor.index == 0 then
+                    cursor.area = "waste"
+                end
+            elseif cursor.area == "waste" then
+                cursor.area = "stock"
+            end
+        end
+    elseif Input.is("right", key) then
+        if cursor.area == "tableau" then
+            cursor.index = math.min(7, cursor.index + 1)
+        else
+            if cursor.area == "stock" then
+                cursor.area = "waste"
+            elseif cursor.area == "waste" then
+                cursor.area = "foundation"
+                cursor.index = 1
+            elseif cursor.area == "foundation" then
+                cursor.index = math.min(4, cursor.index + 1)
+            end
+        end
+    elseif Input.is("down", key) then
+        -- move to tableau
+        if cursor.area == "tableau" then
+            -- move down a row? nothing
+        else
+            cursor.area = "tableau"
+            cursor.index = 1
+        end
+    elseif Input.is("up", key) then
+        if cursor.area == "tableau" then
+            cursor.area = "stock"
+            cursor.index = 1
+        elseif cursor.area == "foundation" or cursor.area == "waste" then
+            cursor.area = "stock"
+            cursor.index = 1
+        end
+    elseif Input.is("select", key) then
+        if selected then
+            -- deselect: put back to original pile
+            local origin = selected
+            if origin.pileType == "tableau" then
+                local p = state.tableau[origin.index]
+                for _,c in ipairs(origin.cards) do table.insert(p, c) end
+            elseif origin.pileType == "waste" then
+                for _,c in ipairs(origin.cards) do table.insert(state.waste, c) end
+            elseif origin.pileType == "foundation" then
+                for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
+            end
+            selected = nil
+        else
+            -- pick up from current cursor
+            local p = pickupFromPile(cursor.area, cursor.index)
+            if p then selected = p end
+        end
+    elseif Input.is("move", key) then
+        if selected then
+            -- attempt move to cursor location
+            local ok = placeOntoPile(cursor.area, cursor.index, selected)
+            if ok then
+                selected = nil
+            else
+                -- invalid move, return cards to origin
+                local origin = selected
+                if origin.pileType == "tableau" then
+                    local p = state.tableau[origin.index]
+                    for _,c in ipairs(origin.cards) do table.insert(p, c) end
+                elseif origin.pileType == "waste" then
+                    for _,c in ipairs(origin.cards) do table.insert(state.waste, c) end
+                elseif origin.pileType == "foundation" then
+                    for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
+                end
+                selected = nil
+            end
+        else
+            -- no selection: if on stock, draw; if on waste or tableau, maybe try to auto move to foundation
+            if cursor.area == "stock" then
+                drawFromStock()
+            elseif cursor.area == "tableau" then
+                -- pick up and attempt auto to foundation
+                local p = pickupFromPile("tableau", cursor.index)
+                if p and #p.cards == 1 then
+                    local card = p.cards[1]
+                    -- try each foundation
+                    local moved = false
+                    for i=1,4 do
+                        if canMoveToFoundation(card, state.foundations[i]) then
+                            table.insert(state.foundations[i], card)
+                            moved = true
+                            break
+                        end
+                    end
+                    if not moved then
+                        -- put back
+                        for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
+                    else
+                        -- flipped in pickup already handled
+                    end
+                elseif p then
+                    -- put back
+                    for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
+                end
+            elseif cursor.area == "waste" then
+                -- attempt move top waste card to foundation or tableau
+                local card = getTopOfPile(state.waste)
+                if card then
+                    local moved = false
+                    for i=1,4 do
+                        if canMoveToFoundation(card, state.foundations[i]) then
+                            table.insert(state.foundations[i], table.remove(state.waste))
+                            moved = true
+                            break
+                        end
+                    end
+                    if not moved then
+                        -- try tableau
+                        for i=1,7 do
+                            if canMoveSequenceToTableau({card}, state.tableau[i]) then
+                                table.insert(state.tableau[i], table.remove(state.waste))
+                                moved = true
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    elseif Input.is("restart", key) then
+        newGame()
+    elseif Input.is("autofound", key) then
+        if selected and #selected.cards == 1 then
+            local card = selected.cards[1]
+            for i=1,4 do
+                if canMoveToFoundation(card, state.foundations[i]) then
+                    table.insert(state.foundations[i], card)
+                    selected = nil
+                    return
+                end
+            end
+        end
+    elseif key == "escape" then
+        love.event.quit()
+    end
+end
+
+function love.draw()
+    love.graphics.clear(0.12, 0.6, 0.2)
+    love.graphics.setFont(fonts.big)
+    love.graphics.setColor(1,1,1)
+    love.graphics.print("Solitaire (vim: h j k l) — use Space to pick, Enter/m to place", UI_LEFT, UI_TOP - 10)
+
+    -- Draw stock
+    local sx, sy = cursorToXY("stock", 1)
+    if #state.stock > 0 then
+        drawCardBack(sx, sy)
+    else
+        love.graphics.setColor(0.2,0.2,0.2)
+        love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
+        drawTextCentered("Empty", sx, sy+CARD_H/2-8, CARD_W)
+    end
+    -- highlight cursor
+    if cursor.area == "stock" then
+        love.graphics.setColor(1,1,0,0.9)
+        love.graphics.setLineWidth(3)
+        love.graphics.rectangle("line", sx-4, sy-4, CARD_W+8, CARD_H+8, 8)
+        love.graphics.setLineWidth(1)
+    end
+
+    -- Draw waste
+    local wx, wy = cursorToXY("waste", 1)
+    if #state.waste > 0 then
+        local top = getTopOfPile(state.waste)
+        top:draw(wx,wy,CARD_W,CARD_H, fonts.small)
+    else
+        love.graphics.setColor(0.18,0.18,0.18)
+        love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
+        drawTextCentered("Waste", wx, wy+CARD_H/2-8, CARD_W)
+    end
+    if cursor.area == "waste" then
+        love.graphics.setColor(1,1,0,0.9)
+        love.graphics.rectangle("line", wx-4, wy-4, CARD_W+8, CARD_H+8, 8)
+    end
+
+    -- Foundations
+    for i=1,4 do
+        local fx, fy = cursorToXY("foundation", i)
+        local pile = state.foundations[i]
+        if #pile > 0 then
+            getTopOfPile(pile):draw(fx,fy,CARD_W,CARD_H, fonts.small)
+        else
+            love.graphics.setColor(0.18,0.18,0.18)
+            love.graphics.rectangle("line", fx, fy, CARD_W, CARD_H, 6)
+            drawTextCentered("Foundation", fx, fy+CARD_H/2-8, CARD_W)
+        end
+        if cursor.area == "foundation" and cursor.index == i then
+            love.graphics.setColor(1,1,0,0.9)
+            love.graphics.rectangle("line", fx-4, fy-4, CARD_W+8, CARD_H+8, 8)
+        end
+    end
+
+    -- Draw tableau
+    for i=1,7 do
+        local tx, ty = cursorToXY("tableau", i)
+        local pile = state.tableau[i]
+        local y = ty
+        if #pile == 0 then
+            love.graphics.setColor(0.18,0.18,0.18)
+            love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
+            drawTextCentered("Empty", tx, ty+CARD_H/2-8, CARD_W)
+        else
+            for j=1,#pile do
+                local c = pile[j]
+                local drawY = ty + (j-1)*20
+                c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
+            end
+        end
+        if cursor.area == "tableau" and cursor.index == i then
+            love.graphics.setColor(1,1,0,0.9)
+            love.graphics.rectangle("line", tx-4, ty-4, CARD_W+8, CARD_H+8 + math.max(0,(#pile-1)*20), 8)
+        end
+    end
+
+    -- Draw selected cards near cursor bottom-left
+    if selected then
+        love.graphics.setColor(0,0,0,0.6)
+        love.graphics.print("Selected: "..#selected.cards.." card(s)", UI_LEFT, love.graphics.getHeight()-40)
+    end
+
+    -- small instructions
+    love.graphics.setFont(fonts.small)
+    love.graphics.setColor(1,1,1)
+    love.graphics.print("Controls: h/j/k/l or arrows to move • Space select/deselect • Enter/m to move/draw • r restart • f autofound", UI_LEFT, love.graphics.getHeight()-20)
+end
