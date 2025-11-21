@@ -1,4 +1,3 @@
-
 local Deck = require "deck"
 local Card = require "card"
 local Input = require "input"
@@ -213,12 +212,17 @@ function love.keypressed(key)
         else
             -- move left in top row (stock->waste->foundations)
             if cursor.area == "foundation" then
-                cursor.index = math.max(1, cursor.index - 1)
-                if cursor.index == 0 then
+                if cursor.index > 1 then
+                    cursor.index = cursor.index - 1
+                else
                     cursor.area = "waste"
+                    cursor.index = 1
                 end
             elseif cursor.area == "waste" then
                 cursor.area = "stock"
+                cursor.index = 1
+            elseif cursor.area == "stock" then
+                -- already at leftmost; do nothing
             end
         end
     elseif Input.is("right", key) then
@@ -371,7 +375,7 @@ function love.draw()
     else
         love.graphics.setColor(0.2,0.2,0.2)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
-        drawTextCentered("Empty", sx, sy+CARD_H/2-8, CARD_W)
+        drawTextCentered("Empty", sx, sy+CARD_W/2-8, CARD_W)
     end
     -- highlight cursor
     if cursor.area == "stock" then

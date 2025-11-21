@@ -1,6 +1,10 @@
 local Card = require "card"
 local M = {}
 
+-- seed once at module load (avoid reseeding on every shuffle)
+math.randomseed(os.time())
+math.random() -- warmup
+
 function M.newDeck()
     local deck = {}
     for s=1,4 do
@@ -12,7 +16,6 @@ function M.newDeck()
 end
 
 local function shuffle(deck)
-    math.randomseed(os.time())
     for i = #deck, 2, -1 do
         local j = math.random(i)
         deck[i], deck[j] = deck[j], deck[i]

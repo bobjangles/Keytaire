@@ -1,6 +1,8 @@
 local Card = {}
 Card.__index = Card
 
+local unpack = table.unpack or unpack
+
 local ranks = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }
 local suits = { "♠", "♥", "♦", "♣" }
 
@@ -11,7 +13,7 @@ function Card.new(rankIndex, suitIndex)
     self.rank = ranks[rankIndex]
     self.suit = suits[suitIndex]
     self.faceUp = false
-    -- red for hearts/diamonds
+    -- red for hearts/diamonds (use numeric colors, to be unpacked when calling love.graphics.setColor)
     self.color = (suitIndex == 2 or suitIndex == 3) and {1,0,0} or {0,0,0}
     return self
 end
@@ -32,8 +34,10 @@ function Card:draw(x, y, w, h, font)
         love.graphics.setColor(0,0,0)
         love.graphics.rectangle("line", x, y, w, h, 6, 6)
         love.graphics.setFont(font)
-        love.graphics.setColor(self.color)
+        love.graphics.setColor(unpack(self.color))
         love.graphics.print(self.rank .. self.suit, x+8, y+6)
+        -- second corner (keep color)
+        love.graphics.setColor(unpack(self.color))
         love.graphics.print(self.rank .. self.suit, x+w-28, y+h-24)
     end
 end
