@@ -21,6 +21,11 @@ local cursor = {
 
 local selected = nil -- { pileType="tableau"/"foundation"/"waste", index=..., cards={...}, absIndex=... }
 
+-- For detecting quick key sequences (gg)
+local lastKey = nil
+local lastKeyTime = 0
+local SEQ_TIMEOUT = 0.5 -- seconds for double-press sequences
+
 local function newGame()
     -- create deck, shuffle, deal
     local deck = Deck.newDeck()
@@ -273,7 +278,104 @@ local function drawSelectedAtBottomLeft()
     end
 end
 
+-- helper moves for vim motions
+local function moveToFarRight()
+    if cursor.area == "tableau" then
+        cursor.index = 7
+        local pile = state.tableau[cursor.index]
+        local nFaceUp = faceUpCount(pile)
+        cursor.cardIndex = nFaceUp > 0 and nFaceUp or 0
+    else
+        cursor.area = "foundation"
+        cursor.index = 4
+        cursor.cardIndex = 0
+    end
+end
+
+local function moveToFarLeft()
+    if cursor.area == "tableau" then
+        cursor.index = 1
+        local pile = state.tableau[cursor.index]
+        local nFaceUp = faceUpCount(pile)
+        cursor.cardIndex = nFaceUp > 0 and nFaceUp or 0
+    else
+        cursor.area = "stock"
+        cursor.index = 1
+        cursor.cardIndex = 0
+    end
+end
+
+local function moveToTopRow()
+    cursor.area = "stock"
+    cursor.index = 1
+    cursor.cardIndex = 0
+end
+
+local function moveToBottomRow()
+    -- move to tableau area; keep current column if possible
+    cursor.area = "tableau"
+    if not cursor.index or cursor.index < 1 then cursor.index = 1 end
+    cursor.index = math.min(7, cursor.index)
+    local pile = state.tableau[cursor.index]
+    local nFaceUp = faceUpCount(pile)
+    cursor.cardIndex = nFaceUp > 0 and nFaceUp or 0
+end
+
 function love.keypressed(key)
+    local now = love.timer.getTime()
+
+    -- 1) Handle uppercase G (Shift+g) -> bottom row
+    if key == "g" and (love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")) then
+        moveToBottomRow()
+        lastKey = nil
+        lastKeyTime = 0
+        return
+    end
+
+    -- 2) Handle '$' — support "end" key, or Shift+4 as '$'
+    local isDollar = false
+    if key == "$" or key == "end" then
+        isDollar = true
+    elseif key == "4" and (love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")) then
+        isDollar = true
+    end
+    if isDollar then
+        moveToFarRight()
+        lastKey = nil
+        lastKeyTime = 0
+        return
+    end
+
+    -- 3) Handle '0' -> far left
+    if key == "0" then
+        moveToFarLeft()
+        lastKey = nil
+        lastKeyTime = 0
+        return
+    end
+
+    -- 4) Handle 'gg' (double-press g within SEQ_TIMEOUT) -> top row
+    if key == "g" and not (love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")) then
+        if lastKey == "g" and (now - lastKeyTime) <= SEQ_TIMEOUT then
+            -- gg detected
+            moveToTopRow()
+            lastKey = nil
+            lastKeyTime = 0
+            return
+        else
+            -- record first 'g' and wait for a possible second
+            lastKey = "g"
+            lastKeyTime = now
+            -- don't fall through to other movement handling on a single 'g'
+            return
+        end
+    end
+
+    -- clear sequence state for other keys
+    lastKey = nil
+    lastKeyTime = 0
+
+    -- existing navigation handling (arrow/vim keys) and actions
     if Input.is("left", key) then
         if cursor.area == "tableau" then
             cursor.index = math.max(1, cursor.index - 1)
@@ -586,5 +688,5 @@ function love.draw()
     -- small instructions
     love.graphics.setFont(fonts.small)
     love.graphics.setColor(1,1,1)
-    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down (on tableau) cycle face-up cards; Up at topmost face-up moves to top row • Space select/deselect • Enter/m to move/draw • r restart • f autofound", UI_LEFT, love.graphics.getHeight()-20)
+    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down (on tableau) cycle face-up cards; Up at topmost face-up moves to top row • Space select/deselect • Enter/m to move/draw • r restart • f autofound • vim: 0/$/gg/G", UI_LEFT, love.graphics.getHeight()-20)
 end
