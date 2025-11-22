@@ -11,6 +11,9 @@ local UI_LEFT = 20
 local state = {}
 local fonts = {}
 
+-- background image (loaded in love.load)
+local bgImage = nil
+
 local cursor = {
     area = "stock", -- "stock","waste","foundation","tableau"
     index = 1, -- for foundation (1..4) or tableau (1..7)
@@ -242,6 +245,17 @@ end
 function love.load()
     fonts.small = love.graphics.newFont(14)
     fonts.big = love.graphics.newFont(20)
+
+    -- load background image (safe: won't error if missing)
+    local ok, img = pcall(function() return love.graphics.newImage("PNG/Texturelabs_Fabric_184M.jpg") end)
+    if ok and img then
+        bgImage = img
+    else
+        bgImage = nil
+        -- optional: print an informative message to the console for debugging
+        print("Warning: background image PNG/Texturelabs_Fabric_184M.jpg not found or failed to load; using solid background color.")
+    end
+
     newGame()
 end
 
@@ -583,7 +597,17 @@ function love.keypressed(key)
 end
 
 function love.draw()
-    love.graphics.clear(0.12, 0.6, 0.2)
+    -- draw background image if available, otherwise fall back to the solid color
+    if bgImage then
+        local w, h = love.graphics.getDimensions()
+        local iw, ih = bgImage:getWidth(), bgImage:getHeight()
+        local sx, sy = w / iw, h / ih
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(bgImage, 0, 0, 0, sx, sy)
+    else
+        love.graphics.clear(0.12, 0.6, 0.2)
+    end
+
     love.graphics.setFont(fonts.big)
     love.graphics.setColor(1,1,1)
     love.graphics.print("Solitaire (vim: h j k l) — use Space to pick, Enter/m to place", UI_LEFT, UI_TOP - 10)
