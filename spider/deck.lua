@@ -1,21 +1,15 @@
 local Card = require "card"
 local M = {}
 
--- seed once at module load
+-- seed once at module load (avoid reseeding on every shuffle)
 math.randomseed(os.time())
 math.random() -- warmup
 
--- Use two suits (spades and hearts) and 4 copies of each (26 * 4 = 104)
-local SUITS = {1, 2}      -- suit indices from card.lua: 1="s", 2="h"
-local DECK_COUNT = 4      -- 4 copies of the 2-suit set -> 104 cards
-
 function M.newDeck()
     local deck = {}
-    for d = 1, DECK_COUNT do
-        for _, s in ipairs(SUITS) do
-            for r = 1, 13 do
-                table.insert(deck, Card.new(r, s))
-            end
+    for s=1,4 do
+        for r=1,13 do
+            table.insert(deck, Card.new(r,s))
         end
     end
     return deck

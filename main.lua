@@ -280,7 +280,7 @@ local function checkAndSetWin()
     if total == 0 and not state.win then
         state.win = true
         state.winTimer = 3.0 -- seconds
-        state.winMessage = "You win! 🎉"
+        state.winMessage = "You win!"
     end
 end
 

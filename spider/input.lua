@@ -8,6 +8,8 @@ Input.bindings = {
     move = {"return", "m"},
     restart = {"r"},
     autofound = {"f"},
+    undo = {"u"},
+    redo = {"n"},
 }
 
 function Input.is(action, key)
