@@ -24,3 +24,4 @@ What this prototype includes
 Notes / Improvements
 - This is a prototype focusing on navigation and core moves. Rules and visuals can be improved.
 - Undo, scoring, and complete rule validation (e.g., multiple-card moves only when correctly alternating) are minimal but can be extended.
+- Textures will be added at a later date
