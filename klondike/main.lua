@@ -271,8 +271,85 @@ local function clampCursor()
     end
 end
 
+-- NEW HELPERS
+-- return true if any card in tableau piles is face-down
+local function anyFaceDownInTableau()
+    for i = 1, 7 do
+        local pile = state.tableau[i]
+        for j = 1, #pile do
+            if not pile[j].faceUp then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Try to move top of waste to any foundation. Return true if moved.
+local function tryMoveWasteTopToFoundation()
+    if #state.waste == 0 then return false end
+    local card = getTopOfPile(state.waste)
+    if not card then return false end
+    for i = 1, 4 do
+        if canMoveToFoundation(card, state.foundations[i]) then
+            table.insert(state.foundations[i], table.remove(state.waste))
+            return true
+        end
+    end
+    return false
+end
+
+-- Try to move top card from any tableau pile to any foundation. Return true if moved.
+local function tryMoveTableauTopToFoundation()
+    for i = 1, 7 do
+        local pile = state.tableau[i]
+        if #pile > 0 then
+            local top = pile[#pile]
+            if top.faceUp then
+                for f = 1, 4 do
+                    if canMoveToFoundation(top, state.foundations[f]) then
+                        table.remove(pile) -- remove top
+                        table.insert(state.foundations[f], top)
+                        -- flip new top if needed
+                        if #pile > 0 and not pile[#pile].faceUp then
+                            pile[#pile].faceUp = true
+                        end
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- If all tableau cards are face-up, repeatedly move available top cards to foundations
+-- until no more legal moves are possible. This helps auto-complete the game when only face-up
+-- cards remain.
+local function autoMoveAllFaceUpToFoundations()
+    -- only run when there are no face-down cards in tableau
+    if anyFaceDownInTableau() then return end
+
+    local moved = true
+    while moved do
+        moved = false
+        -- prefer moving waste first (common rule)
+        if tryMoveWasteTopToFoundation() then
+            moved = true
+        else
+            if tryMoveTableauTopToFoundation() then
+                moved = true
+            end
+        end
+    end
+end
+
 -- Check win condition: no cards in bottom area (tableau). Set a short timer and message.
+-- Also, if all cards in tableau are face-up, auto-move them into foundations when possible.
 local function checkAndSetWin()
+    -- If all cards are face-up, attempt to auto-move them to foundations.
+    autoMoveAllFaceUpToFoundations()
+
     local total = 0
     for i=1,7 do
         total = total + #state.tableau[i]
@@ -828,7 +905,7 @@ function love.draw()
     -- small instructions
     love.graphics.setFont(fonts.small)
     love.graphics.setColor(1,1,1)
-    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down (on tableau) cycle face-up cards; Up at topmost face-up moves to top row • Space select/deselect • Enter/m to move/draw • u undo • n redo • r restart", UI_LEFT, love.graphics.getHeight() - 26)
+    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down to cycle face-up cards • Space select/deselect • Enter/m move/draw • r restart • u undo • n redo", UI_LEFT, UI_TOP + 30)
 
     -- Win message (centered) while timer > 0
     if state.win and state.winTimer and state.winTimer > 0 then
