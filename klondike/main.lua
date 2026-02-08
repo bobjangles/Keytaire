@@ -2,6 +2,7 @@
 local Deck = require "deck"
 local Card = require "card"
 local Input = require "input"
+local ImageCache = require "card_images"
 local Undo = require "undo"
 
 local CARD_W, CARD_H = 100, 140
