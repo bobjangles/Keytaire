@@ -5,7 +5,7 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 
-local CARD_W, CARD_H = 100, 140
+local CARD_W, CARD_H = 120, 160
 local PADDING = 20
 local TABLEAU_SPACING = 30
 local UI_TOP = 20
@@ -866,7 +866,7 @@ function love.draw()
         else
             for j=1,#pile do
                 local c = pile[j]
-                local drawY = ty + (j-1)*20
+                local drawY = ty + (j-1)*30
                 c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
             end
         end
