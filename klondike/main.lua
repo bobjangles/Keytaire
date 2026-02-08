@@ -5,7 +5,10 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 
-local CARD_W, CARD_H = 120, 160
+
+
+local cardImg = ImageCache.getCardImage(self.rank, self.suit)
+local CARD_W, CARD_H = cardImg:getWidth(), cardImg:getHeight()
 local PADDING = 20
 local TABLEAU_SPACING = 30
 local UI_TOP = 20

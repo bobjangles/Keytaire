@@ -32,7 +32,7 @@ end
 
 function ImageCache.getBackImage()
     if not imageCache["back"] then
-        local ok, img = pcall(function() return love.graphics.newImage("PNG/Cards (medium)/card_back.png") end)
+        local ok, img = pcall(function() return love.graphics.newImage("PNG/Cards (large)/card_back.png") end)
         if ok and img then
             imageCache["back"] = img
         else
