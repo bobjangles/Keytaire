@@ -5,10 +5,7 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 
-
-
-local cardImg = ImageCache.getCardImage(self.rank, self.suit)
-local CARD_W, CARD_H = cardImg:getWidth(), cardImg:getHeight()
+local CARD_W, CARD_H = 100, 140
 local PADDING = 20
 local TABLEAU_SPACING = 30
 local UI_TOP = 20
@@ -377,6 +374,18 @@ function love.load()
         bgImage = nil
         -- optional: print an informative message to the console for debugging
         print("Warning: background image PNG/Texturelabs_Fabric_184M.jpg not found or failed to load; using solid background color.")
+    end
+    -- loading the first image to get card size
+    local cardImg = ImageCache.getCardImage("A","s")
+    if cardImg then
+        CARD_W = cardImg:getWidth()
+        CARD_H = cardImg:getHeight()
+        print("card dimensions:" .. CARD_W .. "x" .. CARD_H)
+
+    else
+        print("Warning: Could not load card image for sizing, using defaults")
+        CARD_W = 100
+        CARD_H = 140
     end
 
     newGame()
@@ -869,7 +878,7 @@ function love.draw()
         else
             for j=1,#pile do
                 local c = pile[j]
-                local drawY = ty + (j-1)*30
+                local drawY = ty + (j-1)*20
                 c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
             end
         end
