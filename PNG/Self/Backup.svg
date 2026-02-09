@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    sodipodi:docname="Template.svg"
-   inkscape:export-filename="8spade_300DPI.png"
+   inkscape:export-filename="2spade_300DPI.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -27,8 +27,8 @@
      inkscape:deskcolor="#505050"
      inkscape:document-units="px"
      inkscape:zoom="4.85"
-     inkscape:cx="61.958763"
-     inkscape:cy="71.237113"
+     inkscape:cx="90"
+     inkscape:cy="64.020619"
      inkscape:window-width="1920"
      inkscape:window-height="1057"
      inkscape:window-x="1672"
@@ -90,34 +90,6 @@
        inkscape:locked="false"
        inkscape:label=""
        inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="25,152.37113"
-       orientation="-1,0"
-       id="guide6"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="75,143.09278"
-       orientation="-1,0"
-       id="guide14"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="123.50515,88.75"
-       orientation="0,1"
-       id="guide16"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="146.80412,51.25"
-       orientation="0,1"
-       id="guide17"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
   </sodipodi:namedview>
   <defs
      id="defs1">
@@ -169,60 +141,6 @@
        width="28.659794"
        height="28.865978"
        id="rect13" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect6" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect7" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect8" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect14" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect15" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect16" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect17" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect18" />
-    <rect
-       x="41.237114"
-       y="28.659794"
-       width="28.659794"
-       height="28.865978"
-       id="rect19" />
   </defs>
   <g
      inkscape:label="Layer 1"
@@ -245,7 +163,7 @@
        transform="matrix(1.4485396,0,0,1.4485396,-56.250776,-13.82251)"><tspan
          x="41.236328"
          y="40.82453"
-         id="tspan1">8♠ </tspan></text>
+         id="tspan1">2♠ </tspan></text>
     <text
        xml:space="preserve"
        id="text3-94"
@@ -253,7 +171,7 @@
        transform="matrix(1.4485396,0,0,1.4485396,12.721919,101.51797)"><tspan
          x="41.236328"
          y="40.82453"
-         id="tspan2">8♠ </tspan></text>
+         id="tspan2">2♠ </tspan></text>
     <text
        xml:space="preserve"
        id="text4"
@@ -261,7 +179,7 @@
        transform="translate(-38.556701,0.41237113)" />
     <g
        id="layer1-8"
-       transform="translate(2.7422258,26.618826)">
+       transform="translate(27.896865,26.618826)">
       <text
          xml:space="preserve"
          id="text3-9"
@@ -270,18 +188,10 @@
            x="41.236328"
            y="40.82453"
            id="tspan3">♠ </tspan></text>
-      <text
-         xml:space="preserve"
-         id="text6"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect7);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-20.049119,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan4">♠ </tspan></text>
     </g>
     <g
        id="g13"
-       transform="translate(2.7422248,96.660063)">
+       transform="translate(27.896864,96.660063)">
       <text
          xml:space="preserve"
          id="text13"
@@ -289,63 +199,7 @@
          transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
            x="41.236328"
            y="40.82453"
-           id="tspan6">♠ </tspan></text>
-    </g>
-    <g
-       id="g7"
-       transform="translate(52.845318,96.660063)">
-      <text
-         xml:space="preserve"
-         id="text7"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect8);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan8">♠ </tspan></text>
-    </g>
-    <g
-       id="g15"
-       transform="translate(2.7422258,63.732228)">
-      <text
-         xml:space="preserve"
-         id="text14"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect15);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan9">♠ </tspan></text>
-      <text
-         xml:space="preserve"
-         id="text15"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect16);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-20.049119,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan10">♠ </tspan></text>
-    </g>
-    <g
-       id="g16"
-       transform="translate(28.02573,45.242538)">
-      <text
-         xml:space="preserve"
-         id="text16"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect17);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan11">♠ </tspan></text>
-    </g>
-    <g
-       id="g18"
-       transform="translate(28.02573,82.689697)">
-      <text
-         xml:space="preserve"
-         id="text18"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect19);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan12">♠ </tspan></text>
+           id="tspan4">♠ </tspan></text>
     </g>
   </g>
 </svg>
