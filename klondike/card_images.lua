@@ -42,7 +42,7 @@ end
 
 function ImageCache.getBackImage()
     if not _rawCache["back"] then
-	    _rawCache["back"] = loadRawImage("PNG/Cards (large)/card_back/png")
+	    _rawCache["back"] = loadRawImage("PNG/Self/card_back.png")
 	end
 	return _rawCache["back"]
 end
