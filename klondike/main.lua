@@ -5,7 +5,6 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 
-local CARD_W, CARD_H = 100, 140
 local PADDING = 20
 local TABLEAU_SPACING = 30
 local UI_TOP = 20
@@ -91,12 +90,6 @@ local function drawTextCentered(text, x, y, w)
     love.graphics.print(text, x + (w - sw)/2, y)
 end
 
-local function drawCardBack(x,y)
-    love.graphics.setColor(0.2,0.2,0.6)
-    love.graphics.rectangle("fill", x, y, CARD_W, CARD_H, 6)
-    love.graphics.setColor(0.15,0.15,0.4)
-    love.graphics.rectangle("line", x, y, CARD_W, CARD_H, 6)
-end
 
 local function getTopOfPile(pile)
     return pile[#pile]
@@ -374,18 +367,6 @@ function love.load()
         bgImage = nil
         -- optional: print an informative message to the console for debugging
         print("Warning: background image PNG/Texturelabs_Fabric_184M.jpg not found or failed to load; using solid background color.")
-    end
-    -- loading the first image to get card size
-    local cardImg = ImageCache.getCardImage("A","s")
-    if cardImg then
-        CARD_W = cardImg:getWidth()
-        CARD_H = cardImg:getHeight()
-        print("card dimensions:" .. CARD_W .. "x" .. CARD_H)
-
-    else
-        print("Warning: Could not load card image for sizing, using defaults")
-        CARD_W = 100
-        CARD_H = 140
     end
 
     newGame()

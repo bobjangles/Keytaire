@@ -20,21 +20,23 @@ end
 function Card:draw(x, y, w, h, font)
     if not self.faceUp then
         -- Draw card back image
-        local backImg = ImageCache.getBackImage()
-        if backImg then
+        local backTex = ImageCache.getBackTexture(w,h)
+        if backTex then
             love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(backImg, x, y, 0, w / backImg:getWidth(), h / backImg:getHeight())
+            love.graphics.draw(backTex, x, y)
         else
             -- Fallback to drawn back
-            love.graphics.setColor(0.2, 0.2, 0.2)
-            love.graphics.rectangle("fill", x, y, w, h, 6, 6)
+            love.graphics.setColor(0.2, 0.2, 0.6)
+            love.graphics.rectangle("fill", x, y, w, h, 6)
+	    love.graphics.setColor(0.15,0.15,0.4)
+	    love.graphics.rectangle("line", x, y, w, h, 6)
         end
     else
         -- Draw card face image
-        local cardImg = ImageCache.getCardImage(self.rank, self.suit)
-        if cardImg then
+        local tex = ImageCache.getCardTexture(self.rank, self.suit, w, h)
+        if tex then
             love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(cardImg, x, y, 0, w / cardImg:getWidth(), h / cardImg:getHeight())
+            love.graphics.draw(tex, x, y)
         else
             -- Fallback to drawn card
             love.graphics.setColor(1, 1, 1)
