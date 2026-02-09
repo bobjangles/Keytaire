@@ -12,7 +12,7 @@ local function getImagePath(rank, suit)
     }
     local suitName = suitMap[suit] or suit
     local rankName = rankMap[rank] or rank
-    return "PNG/Cards (large)/card_" .. suitName .. "_" .. rankName .. ".png"
+    return "PNG/Self/card_" .. suitName .. "_" .. rankName .. ".png"
 end
 
 function ImageCache.getCardImage(rank, suit)
