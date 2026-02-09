@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    sodipodi:docname="Template.svg"
-   inkscape:export-filename="2spade_300DPI.png"
+   inkscape:export-filename="card_clubs_A.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -27,8 +27,8 @@
      inkscape:deskcolor="#505050"
      inkscape:document-units="px"
      inkscape:zoom="4.85"
-     inkscape:cx="90"
-     inkscape:cy="64.020619"
+     inkscape:cx="56.804124"
+     inkscape:cy="67.113402"
      inkscape:window-width="1920"
      inkscape:window-height="1057"
      inkscape:window-x="1672"
@@ -73,20 +73,6 @@
        position="46.89433,70"
        orientation="0,1"
        id="guide11"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="172.6184,107.5"
-       orientation="0,1"
-       id="guide12"
-       inkscape:locked="false"
-       inkscape:label=""
-       inkscape:color="rgb(0,134,229)" />
-    <sodipodi:guide
-       position="136.78399,37.5"
-       orientation="0,1"
-       id="guide13"
        inkscape:locked="false"
        inkscape:label=""
        inkscape:color="rgb(0,134,229)" />
@@ -141,6 +127,126 @@
        width="28.659794"
        height="28.865978"
        id="rect13" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect6" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect7" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect8" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect14" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect15" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect16" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect17" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect18" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect19" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect20" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect21" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect24" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect25" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect26" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect27" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect32" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect33" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect34" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect35" />
+    <rect
+       x="41.237114"
+       y="28.659794"
+       width="28.659794"
+       height="28.865978"
+       id="rect38" />
   </defs>
   <g
      inkscape:label="Layer 1"
@@ -163,43 +269,32 @@
        transform="matrix(1.4485396,0,0,1.4485396,-56.250776,-13.82251)"><tspan
          x="41.236328"
          y="40.82453"
-         id="tspan1">2♠ </tspan></text>
+         id="tspan1">A♣ </tspan></text>
     <text
        xml:space="preserve"
        id="text3-94"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-9);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-       transform="matrix(1.4485396,0,0,1.4485396,12.721919,101.51797)"><tspan
+       transform="matrix(1.4485396,0,0,1.4485396,10.350785,101.51797)"><tspan
          x="41.236328"
          y="40.82453"
-         id="tspan2">2♠ </tspan></text>
+         id="tspan2">A♣ </tspan></text>
     <text
        xml:space="preserve"
        id="text4"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
        transform="translate(-38.556701,0.41237113)" />
     <g
-       id="layer1-8"
-       transform="translate(27.896865,26.618826)">
+       id="g16"
+       transform="matrix(6.0048711,0,0,5.1859118,-76.363481,-62.468487)"
+       style="display:inline">
       <text
          xml:space="preserve"
-         id="text3-9"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-2);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
+         id="text16"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect17);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
+         transform="matrix(1.2520947,0,0,1.444326,-36.021849,-22.225752)"><tspan
            x="41.236328"
            y="40.82453"
-           id="tspan3">♠ </tspan></text>
-    </g>
-    <g
-       id="g13"
-       transform="translate(27.896864,96.660063)">
-      <text
-         xml:space="preserve"
-         id="text13"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect13);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-         transform="matrix(2.0629203,0,0,2.0629203,-70.152212,-45.98821)"><tspan
-           x="41.236328"
-           y="40.82453"
-           id="tspan4">♠ </tspan></text>
+           id="tspan3">♣ </tspan></text>
     </g>
   </g>
 </svg>
