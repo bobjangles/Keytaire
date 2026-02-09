@@ -35,7 +35,6 @@ function ImageCache.getCardImage(rank, suit)
     local key = rank .. suit
     if not _rawCache[key] then
         _rawCache[key] = loadRawImage(getImagePath(rank, suit))
-        end
     end
     return _rawCache[key]
 end

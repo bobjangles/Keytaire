@@ -802,7 +802,16 @@ function love.draw()
     -- Draw stock
     local sx, sy = cursorToXY("stock", 1)
     if #state.stock > 0 then
-        drawCardBack(sx, sy)
+        local backTex = ImageCache.getBackTexture(CARD_W, CARD_H)
+        if backTex then
+            love.graphics.setColor(1,1,1)
+            love.graphics.draw(backTex, sx, sy)
+        else
+            love.graphics.setColor(0.2,0.2,0.2)
+            love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
+        end
     else
         love.graphics.setColor(0.2,0.2,0.2)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
