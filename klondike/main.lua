@@ -5,6 +5,8 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 
+local CARD_W = 100
+local CARD_H = 140
 local PADDING = 20
 local TABLEAU_SPACING = 30
 local UI_TOP = 20

@@ -51,7 +51,7 @@ end
 
 local function getScaledTexture(rawImg, w, h)
     -- Create a unique cache key
-    local key = rawImg .. "_" .. w .. "x" .. h
+    local key = tostring(rawImg) .. "_" .. w .. "x" .. h
     if _canvasCache[key] then return _canvasCache[key] end
 
     -- Build a canvas of the target size
@@ -69,7 +69,8 @@ local function getScaledTexture(rawImg, w, h)
     love.graphics.setCanvas()   -- restore default render target
 
     -- Turn the canvas into a regular Image (so callers can treat it like any other texture)
-    local tex = canvas:newImageData():newImage()
+    local imageData = canvas:newImageData()
+    local tex = love.graphics.newImage(imageData)
     tex:setFilter("nearest", "nearest")
     _canvasCache[key] = tex
     return tex
