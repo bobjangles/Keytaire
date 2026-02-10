@@ -809,8 +809,8 @@ function love.draw()
             love.graphics.setColor(1,1,1)
             love.graphics.draw(backTex, sx, sy)
         else
-            love.graphics.setColor(0.2,0.2,0.2)
-            love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
+            --love.graphics.setColor(0.2,0.2,0.2)
+            --love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
             love.graphics.setColor(1, 1, 1)
             love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
         end
@@ -821,8 +821,8 @@ function love.draw()
     end
     -- highlight cursor
     if cursor.area == "stock" then
-        love.graphics.setColor(1,1,0,0.9)
-        love.graphics.setLineWidth(3)
+        --love.graphics.setColor(1,1,0,0.9)
+        --love.graphics.setLineWidth(3)
         love.graphics.rectangle("line", sx-4, sy-4, CARD_W+8, CARD_H+8, 8)
         love.graphics.setLineWidth(1)
     end
