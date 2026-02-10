@@ -9,7 +9,7 @@
    id="svg1"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
    sodipodi:docname="Template.svg"
-   inkscape:export-filename="card_back.png"
+   inkscape:export-filename="card_clubs_08.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -28,8 +28,8 @@
      inkscape:deskcolor="#505050"
      inkscape:document-units="px"
      inkscape:zoom="4"
-     inkscape:cx="40.375"
-     inkscape:cy="79.125"
+     inkscape:cx="8.375"
+     inkscape:cy="82.375"
      inkscape:window-width="2048"
      inkscape:window-height="1124"
      inkscape:window-x="0"
@@ -45,7 +45,7 @@
        inkscape:label=""
        inkscape:color="rgb(0,134,229)" />
     <sodipodi:guide
-       position="77.380799,135"
+       position="130.10765,135"
        orientation="0,1"
        id="guide7"
        inkscape:locked="false"
@@ -73,15 +73,88 @@
        inkscape:label=""
        inkscape:color="rgb(0,134,229)" />
     <sodipodi:guide
-       position="46.89433,70"
+       position="132,70"
        orientation="0,1"
        id="guide11"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="25,149.50451"
+       orientation="-1,0"
+       id="guide37"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="75,146.77759"
+       orientation="-1,0"
+       id="guide38"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="138.32984,110"
+       orientation="0,1"
+       id="guide39"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="130.36384,30"
+       orientation="0,1"
+       id="guide40"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="172.91016,85"
+       orientation="0,1"
+       id="guide41"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="152.70508,50"
+       orientation="0,1"
+       id="guide42"
+       inkscape:locked="false"
+       inkscape:label=""
+       inkscape:color="rgb(0,134,229)" />
+    <sodipodi:guide
+       position="122.97857,90"
+       orientation="0,1"
+       id="guide46"
        inkscape:locked="false"
        inkscape:label=""
        inkscape:color="rgb(0,134,229)" />
   </sodipodi:namedview>
   <defs
      id="defs1">
+    <rect
+       x="26.75"
+       y="33.25"
+       width="42.75"
+       height="38"
+       id="rect31" />
+    <rect
+       x="22.45064"
+       y="36.769553"
+       width="57.805979"
+       height="56.391766"
+       id="rect30" />
+    <rect
+       x="4.5961941"
+       y="4.5961941"
+       width="43.663844"
+       height="22.98097"
+       id="rect29" />
+    <rect
+       x="4.9375"
+       y="5"
+       width="35.9375"
+       height="36.75"
+       id="rect28" />
     <pattern
        inkscape:collect="always"
        xlink:href="#pattern34-30"
@@ -274,6 +347,30 @@
        width="28.659794"
        height="28.865978"
        id="rect38" />
+    <rect
+       x="4.5961943"
+       y="4.5961943"
+       width="43.663845"
+       height="22.98097"
+       id="rect29-2" />
+    <rect
+       x="4.5961943"
+       y="4.5961943"
+       width="43.663845"
+       height="22.98097"
+       id="rect29-9" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath37">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
+         id="rect37"
+         width="48.878624"
+         height="48.894253"
+         x="25.685688"
+         y="68.481918"
+         ry="18.131275" />
+    </clipPath>
   </defs>
   <g
      inkscape:label="Layer 1"
@@ -288,21 +385,8 @@
        x="6.2846033e-07"
        y="25.979382"
        rx="0"
-       ry="140" />
-    <text
-       xml:space="preserve"
-       id="text4"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4);display:inline;fill:#1a1a1a;stroke-width:3.279;stroke-opacity:0.0659504"
-       transform="translate(-38.556701,0.41237113)" />
-    <rect
-       style="display:none;fill:#00ffff;stroke:#000000;stroke-width:2.91639;stroke-dasharray:none;stroke-opacity:1"
-       id="rect9"
-       width="127.07098"
-       height="86.114822"
-       x="47.201744"
-       y="-81.580513"
-       ry="3.8716483"
-       transform="matrix(-0.00623789,0.99998054,-0.999996,-0.00283,0,0)" />
+       ry="140"
+       inkscape:label="edit" />
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.501976;stroke-dasharray:none;stroke-opacity:1"
        id="rect11"
@@ -319,5 +403,130 @@
        x="5.2443228"
        y="31.210739"
        ry="1.5499195" />
+    <text
+       xml:space="preserve"
+       transform="translate(0.4803938,24.198132)"
+       id="text28"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect29);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="4.5957031"
+         y="16.727342"
+         id="tspan2">8♣ </tspan></text>
+    <text
+       xml:space="preserve"
+       transform="translate(72.04121,143.99459)"
+       id="text28-3"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect29-2);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="4.5957031"
+         y="16.727342"
+         id="tspan3">8♣ </tspan></text>
+    <text
+       xml:space="preserve"
+       transform="translate(6.2846033e-7,25.979382)"
+       id="text29"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.3333px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect30);display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text32"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,2.5804266,13.504376)"><tspan
+         sodipodi:role="line"
+         id="tspan32"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text37"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,2.5583296,93.518308)"><tspan
+         sodipodi:role="line"
+         id="tspan37"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text43"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,52.608231,13.504376)"><tspan
+         sodipodi:role="line"
+         id="tspan43"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text44"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,52.586134,93.518308)"><tspan
+         sodipodi:role="line"
+         id="tspan44"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text45"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,2.5804266,53.489054)"><tspan
+         sodipodi:role="line"
+         id="tspan45"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text46"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,52.608231,53.489054)"><tspan
+         sodipodi:role="line"
+         id="tspan46"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text47"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,27.584066,33.481982)"><tspan
+         sodipodi:role="line"
+         id="tspan47"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:61.7917px;font-family:'Noto Music';-inkscape-font-specification:'Noto Music';writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2.3172;stroke-dasharray:none;stroke-opacity:1"
+       x="22.354803"
+       y="118.46106"
+       id="text48"
+       clip-path="url(#clipPath37)"
+       transform="matrix(0.44791019,0,0,0.44791019,27.584066,73.454254)"><tspan
+         sodipodi:role="line"
+         id="tspan48"
+         x="22.354803"
+         y="118.46106"
+         style="stroke-width:2.3172">♣</tspan></text>
   </g>
 </svg>
