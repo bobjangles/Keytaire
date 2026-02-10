@@ -1,4 +1,4 @@
-Sure thing, master. Here is the original main.lua file exactly as it was uploaded:-- (updated main.lua with undo/redo selection/move fix)
+-- (updated main.lua with undo/redo selection/move fix)
 local Deck = require "deck"
 local Card = require "card"
 local Input = require "input"
@@ -489,4 +489,439 @@ function love.keypressed(key)
             -- gg detected
             moveToTopRow()
             lastKey = nil
-            lastKeyTime =
+            lastKeyTime = 0
+            return
+        else
+            -- record first 'g' and wait for a possible second
+            lastKey = "g"
+            lastKeyTime = now
+            -- don't fall through to other movement handling on a single 'g'
+            return
+        end
+    end
+
+    -- clear sequence state for other keys
+    lastKey = nil
+    lastKeyTime = 0
+
+    -- Undo / Redo handling (use Input bindings so they can be remapped)
+    if Input.is("undo", key) then
+        local prev = undo:undo(state)
+        if prev then
+            state = prev
+            selected = nil
+            clampCursor()
+            checkAndSetWin()
+        end
+        return
+    elseif Input.is("redo", key) then
+        local nextState = undo:redo(state)
+        if nextState then
+            state = nextState
+            selected = nil
+            clampCursor()
+            checkAndSetWin()
+        end
+        return
+    end
+
+    -- existing navigation handling (arrow/vim keys) and actions
+    if Input.is("left", key) then
+        if cursor.area == "tableau" then
+            cursor.index = math.max(1, cursor.index - 1)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 then
+                cursor.cardIndex = 0
+            else
+                cursor.cardIndex = math.min(cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp, nFaceUp)
+            end
+        else
+            -- move left in top row (stock->waste->foundations)
+            if cursor.area == "foundation" then
+                if cursor.index > 1 then
+                    cursor.index = cursor.index - 1
+                else
+                    cursor.area = "waste"
+                    cursor.index = 1
+                end
+            elseif cursor.area == "waste" then
+                cursor.area = "stock"
+                cursor.index = 1
+            elseif cursor.area == "stock" then
+                -- already at leftmost; do nothing
+            end
+        end
+    elseif Input.is("right", key) then
+        if cursor.area == "tableau" then
+            cursor.index = math.min(7, cursor.index + 1)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 then
+                cursor.cardIndex = 0
+            else
+                cursor.cardIndex = math.min(cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp, nFaceUp)
+            end
+        else
+            if cursor.area == "stock" then
+                cursor.area = "waste"
+            elseif cursor.area == "waste" then
+                cursor.area = "foundation"
+                cursor.index = 1
+            elseif cursor.area == "foundation" then
+                cursor.index = math.min(4, cursor.index + 1)
+            end
+        end
+    elseif Input.is("down", key) then
+        if cursor.area == "tableau" then
+            -- move cursor "down" among face-up cards (toward deeper / later cards)
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp > 0 then
+                cursor.cardIndex = math.min(nFaceUp, (cursor.cardIndex > 0 and cursor.cardIndex or nFaceUp) + 1)
+            end
+        else
+            -- move to tableau: set cardIndex to topmost face-up card (nFaceUp) or 0 if none
+            cursor.area = "tableau"
+            cursor.index = 1
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            cursor.cardIndex = nFaceUp > 0 and nFaceUp or 0
+        end
+    elseif Input.is("up", key) then
+        if cursor.area == "tableau" then
+            local pile = state.tableau[cursor.index]
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp == 0 or cursor.cardIndex <= 1 then
+                -- either no face-up cards or already at the topmost face-up: go to top row (stock)
+                cursor.area = "stock"
+                cursor.index = 1
+                cursor.cardIndex = 0
+            else
+                -- move cursor "up" among face-up cards (toward earlier face-up)
+                cursor.cardIndex = math.max(1, cursor.cardIndex - 1)
+            end
+        else
+            -- move focus back to stock when up from top row
+            cursor.area = "stock"
+            cursor.index = 1
+            cursor.cardIndex = 0
+        end
+    elseif Input.is("select", key) then
+        if selected then
+            -- deselect: put back to original pile
+            local origin = selected
+            if origin.pileType == "tableau" then
+                local p = state.tableau[origin.index]
+                for _,c in ipairs(origin.cards) do table.insert(p, c) end
+            elseif origin.pileType == "waste" then
+                for _,c in ipairs(origin.cards) do table.insert(state.waste, c) end
+            elseif origin.pileType == "foundation" then
+                for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
+            end
+            selected = nil
+        else
+            -- pick up from current cursor
+            -- push snapshot BEFORE mutating state (so undo returns to original position)
+            undo:push(state)
+            if cursor.area == "tableau" then
+                local pile = state.tableau[cursor.index]
+                local nFaceUp = faceUpCount(pile)
+                if nFaceUp == 0 then
+                    -- nothing selectable in this pile (face-down only)
+                    -- since nothing changed, pop the last undo entry to avoid empty history entries
+                    undo:undo(state)
+                    return
+                end
+                local p = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
+                if p then selected = p end
+            else
+                local p = pickupFromPile(cursor.area, cursor.index)
+                if not p then
+                    -- nothing picked; rollback the snapshot
+                    undo:undo(state)
+                    return
+                end
+                selected = p
+            end
+        end
+    elseif Input.is("move", key) then
+        if selected then
+            -- selected exists: we already pushed the snapshot at selection time,
+            -- so do NOT push again here (avoids splitting selection+place into two undo steps).
+            -- attempt move to cursor location
+            local ok = placeOntoPile(cursor.area, cursor.index, selected)
+            if ok then
+                selected = nil
+                checkAndSetWin()
+            else
+                -- invalid move, return cards to origin
+                local origin = selected
+                if origin.pileType == "tableau" then
+                    local p = state.tableau[origin.index]
+                    for _,c in ipairs(origin.cards) do table.insert(p, c) end
+                elseif origin.pileType == "waste" then
+                    for _,c in ipairs(origin.cards) do table.insert(state.waste, c) end
+                elseif origin.pileType == "foundation" then
+                    for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
+                end
+                selected = nil
+            end
+        else
+            -- no selection: if on stock, draw; if on waste or tableau, maybe try to auto move to foundation
+            if cursor.area == "stock" then
+                -- push snapshot before drawing
+                undo:push(state)
+                drawFromStock()
+                checkAndSetWin()
+            elseif cursor.area == "tableau" then
+                -- pick up from the current face-up cursor.cardIndex and attempt auto to foundation if single card
+                -- push snapshot before pickup/mutation
+                undo:push(state)
+                local pile = state.tableau[cursor.index]
+                local nFaceUp = faceUpCount(pile)
+                if nFaceUp == 0 then
+                    -- nothing done, rollback snapshot
+                    undo:undo(state)
+                    return
+                end
+                local p = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
+                if p and #p.cards == 1 then
+                    local card = p.cards[1]
+                    -- try each foundation
+                    local moved = false
+                    for i=1,4 do
+                        if canMoveToFoundation(card, state.foundations[i]) then
+                            table.insert(state.foundations[i], card)
+                            moved = true
+                            break
+                        end
+                    end
+                    if not moved then
+                        -- put back
+                        for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
+                        -- nothing changed: rollback snapshot
+                        undo:undo(state)
+                    else
+                        -- successful placement: flip origin top if needed
+                        flipOriginIfNeeded(p)
+                        checkAndSetWin()
+                    end
+                elseif p then
+                    -- put back and rollback snapshot
+                    for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
+                    undo:undo(state)
+                else
+                    -- nothing picked; rollback
+                    undo:undo(state)
+                end
+            elseif cursor.area == "waste" then
+                -- attempt move top waste card to foundation or tableau
+                if #state.waste == 0 then return end
+                -- push snapshot before attempting moves
+                undo:push(state)
+                local card = getTopOfPile(state.waste)
+                if card then
+                    local moved = false
+                    for i=1,4 do
+                        if canMoveToFoundation(card, state.foundations[i]) then
+                            table.insert(state.foundations[i], table.remove(state.waste))
+                            moved = true
+                            break
+                        end
+                    end
+                    if not moved then
+                        -- try tableau
+                        for i=1,7 do
+                            if canMoveSequenceToTableau({card}, state.tableau[i]) then
+                                table.insert(state.tableau[i], table.remove(state.waste))
+                                moved = true
+                                break
+                            end
+                        end
+                    end
+                    if not moved then
+                        -- nothing moved; rollback snapshot
+                        undo:undo(state)
+                    else
+                        checkAndSetWin()
+                    end
+                else
+                    undo:undo(state)
+                end
+            end
+        end
+    elseif Input.is("restart", key) then
+        newGame()
+    elseif Input.is("autofound", key) then
+        -- Autofound is used when player has selected a single card and wants to move it to foundation
+        if selected and #selected.cards == 1 then
+            -- selected was created with a prior snapshot so do NOT push again here
+            local card = selected.cards[1]
+            for i=1,4 do
+                if canMoveToFoundation(card, state.foundations[i]) then
+                    table.insert(state.foundations[i], card)
+                    -- successful placement: flip origin top if needed
+                    flipOriginIfNeeded(selected)
+                    selected = nil
+                    checkAndSetWin()
+                    return
+                end
+            end
+        end
+    elseif key == "escape" then
+        love.event.quit()
+    end
+end
+
+function love.update(dt)
+    if state.win and state.winTimer and state.winTimer > 0 then
+        state.winTimer = state.winTimer - dt
+        if state.winTimer <= 0 then
+            -- stop showing the message; keep win flag if desired
+            state.winTimer = 0
+            -- leave state.win = true so the game remains won; UI stops showing after timer
+        end
+    end
+end
+
+function love.draw()
+    -- draw background image if available, otherwise fall back to the solid color
+    if bgImage then
+        local w, h = love.graphics.getDimensions()
+        local iw, ih = bgImage:getWidth(), bgImage:getHeight()
+        local sx, sy = w / iw, h / ih
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(bgImage, 0, 0, 0, sx, sy)
+    else
+        love.graphics.clear(0.12, 0.6, 0.2)
+    end
+
+    love.graphics.setFont(fonts.big)
+    love.graphics.setColor(1,1,1)
+    love.graphics.print("Solitaire (vim: h j k l) — use Space to pick, Enter/m to place", UI_LEFT, UI_TOP - 10)
+
+    -- Draw stock
+    local sx, sy = cursorToXY("stock", 1)
+    if #state.stock > 0 then
+        local backTex = ImageCache.getBackTexture(CARD_W, CARD_H)
+        if backTex then
+            love.graphics.setColor(1,1,1)
+            love.graphics.draw(backTex, sx, sy)
+        else
+            love.graphics.setColor(0.2,0.2,0.2)
+            love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
+        end
+    else
+        love.graphics.setColor(0.2,0.2,0.2)
+        love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
+        drawTextCentered("Empty", sx, sy+CARD_H/2-8, CARD_W)
+    end
+    -- highlight cursor
+    if cursor.area == "stock" then
+        love.graphics.setColor(1,1,0,0.9)
+        love.graphics.setLineWidth(3)
+        love.graphics.rectangle("line", sx-4, sy-4, CARD_W+8, CARD_H+8, 8)
+        love.graphics.setLineWidth(1)
+    end
+
+    -- Draw waste
+    local wx, wy = cursorToXY("waste", 1)
+    if #state.waste > 0 then
+        local top = getTopOfPile(state.waste)
+        top:draw(wx,wy,CARD_W,CARD_H, fonts.small)
+    else
+        love.graphics.setColor(0.18,0.18,0.18)
+        love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
+        drawTextCentered("Waste", wx, wy+CARD_H/2-8, CARD_W)
+    end
+    if cursor.area == "waste" then
+        love.graphics.setColor(1,1,0,0.9)
+        love.graphics.rectangle("line", wx-4, wy-4, CARD_W+8, CARD_H+8, 8)
+    end
+
+    -- Foundations
+    for i=1,4 do
+        local fx, fy = cursorToXY("foundation", i)
+        local pile = state.foundations[i]
+        if #pile > 0 then
+            getTopOfPile(pile):draw(fx,fy,CARD_W,CARD_H, fonts.small)
+        else
+            love.graphics.setColor(0.18,0.18,0.18)
+            love.graphics.rectangle("line", fx, fy, CARD_W, CARD_H, 6)
+            drawTextCentered("Foundation", fx, fy+CARD_H/2-8, CARD_W)
+        end
+        if cursor.area == "foundation" and cursor.index == i then
+            love.graphics.setColor(1,1,0,0.9)
+            love.graphics.rectangle("line", fx-4, fy-4, CARD_W+8, CARD_H+8, 8)
+        end
+    end
+
+    -- Draw tableau
+    for i=1,7 do
+        local tx, ty = cursorToXY("tableau", i)
+        local pile = state.tableau[i]
+        if #pile == 0 then
+            love.graphics.setColor(0.18,0.18,0.18)
+            love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
+            drawTextCentered("Empty", tx, ty+CARD_W/2-8, CARD_W)
+        else
+            for j=1,#pile do
+                local c = pile[j]
+                local drawY = ty + (j-1)*20
+                c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
+            end
+        end
+
+        -- highlight entire pile when cursor over it
+        if cursor.area == "tableau" and cursor.index == i then
+            love.graphics.setColor(1,1,0,0.3)
+            love.graphics.rectangle("line", tx-4, ty-4, CARD_W, CARD_H+8 + math.max(0,(#pile-1)*20), 8)
+
+            -- highlight the current targeted face-up card and cards underneath
+            local nFaceUp = faceUpCount(pile)
+            if nFaceUp > 0 and cursor.cardIndex > 0 then
+                local absIndex = faceUpPosToAbsolute(pile, cursor.cardIndex)
+                if absIndex then
+                    local startY = ty + (absIndex-1)*20
+                    local height = CARD_H + (#pile - absIndex) * 20
+                    love.graphics.setColor(1,1,0,0.9)
+                    love.graphics.rectangle("line", tx-4, startY-4, CARD_W+8, height+8, 8)
+                end
+            end
+        end
+    end
+
+    -- Draw selected cards in bottom-left
+    if selected then
+        -- small label above the drawn stack
+        local sx = UI_LEFT
+        local margin_bottom = 20
+        local screen_h = love.graphics.getHeight()
+        local start_y = screen_h - CARD_H - margin_bottom
+        love.graphics.setFont(fonts.small)
+        love.graphics.setColor(1,1,1)
+        love.graphics.print("Selected: "..#selected.cards.." card(s)", sx, start_y - 18)
+        drawSelectedAtBottomLeft()
+    end
+
+    -- small instructions
+    love.graphics.setFont(fonts.small)
+    love.graphics.setColor(1,1,1)
+    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down to cycle face-up cards • Space select/deselect • Enter/m move/draw • r restart • u undo • n redo", UI_LEFT, UI_TOP + 30)
+
+    -- Win message (centered) while timer > 0
+    if state.win and state.winTimer and state.winTimer > 0 then
+        love.graphics.setFont(fonts.big)
+        local msg = state.winMessage or "You win!"
+        local w = love.graphics.getWidth()
+        local h = love.graphics.getHeight()
+        local tw = fonts.big:getWidth(msg)
+        love.graphics.setColor(0,0,0,0.6)
+        love.graphics.rectangle("fill", (w - tw)/2 - 20, 60 - 10, tw + 40, 50, 8)
+        love.graphics.setColor(1,1,1)
+        love.graphics.printf(msg, 0, 60, w, "center")
+    end
+end
