@@ -797,9 +797,6 @@ function love.draw()
         love.graphics.clear(0.12, 0.6, 0.2)
     end
 
-    love.graphics.setFont(fonts.big)
-    love.graphics.setColor(1,1,1)
-    love.graphics.print("Solitaire (vim: h j k l) — use Space to pick, Enter/m to place", UI_LEFT, UI_TOP - 10)
 
     -- Draw stock
     local sx, sy = cursorToXY("stock", 1)
@@ -809,8 +806,8 @@ function love.draw()
             love.graphics.setColor(1,1,1)
             love.graphics.draw(backTex, sx, sy)
         else
-            --love.graphics.setColor(0.2,0.2,0.2)
-            --love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
+            love.graphics.setColor(0.2,0.2,0.2)
+            love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
             love.graphics.setColor(1, 1, 1)
             love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
         end
@@ -821,8 +818,8 @@ function love.draw()
     end
     -- highlight cursor
     if cursor.area == "stock" then
-        --love.graphics.setColor(1,1,0,0.9)
-        --love.graphics.setLineWidth(3)
+        love.graphics.setColor(1,1,0,0.9)
+        love.graphics.setLineWidth(3)
         love.graphics.rectangle("line", sx-4, sy-4, CARD_W+8, CARD_H+8, 8)
         love.graphics.setLineWidth(1)
     end
@@ -907,10 +904,6 @@ function love.draw()
         drawSelectedAtBottomLeft()
     end
 
-    -- small instructions
-    love.graphics.setFont(fonts.small)
-    love.graphics.setColor(1,1,1)
-    love.graphics.print("Controls: h/j/k/l or arrows to move • Up/Down to cycle face-up cards • Space select/deselect • Enter/m move/draw • r restart • u undo • n redo", UI_LEFT, UI_TOP + 30)
 
     -- Win message (centered) while timer > 0
     if state.win and state.winTimer and state.winTimer > 0 then

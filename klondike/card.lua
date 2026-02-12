@@ -26,10 +26,10 @@ function Card:draw(x, y, w, h, font)
             love.graphics.draw(backTex, x, y)
         else
             -- Fallback to drawn back
-            love.graphics.setColor(0.2, 0.2, 0.6)
-            love.graphics.rectangle("fill", x, y, w, h, 6)
-	    love.graphics.setColor(0.15,0.15,0.4)
-	    love.graphics.rectangle("line", x, y, w, h, 6)
+           -- love.graphics.setColor(0.2, 0.2, 0.6)
+           -- love.graphics.rectangle("fill", x, y, w, h, 6)
+	       -- love.graphics.setColor(0.15,0.15,0.4)
+	       -- love.graphics.rectangle("line", x, y, w, h, 6)
         end
     else
         -- Draw card face image
