@@ -18,6 +18,9 @@ function Card.new(rankIndex, suitIndex)
 end
 
 function Card:draw(x, y, w, h, font)
+
+    love.graphics.setColor(1,1,1,1) -- reset colour and opacity
+
     if not self.faceUp then
         -- Draw card back image
         local backTex = ImageCache.getBackTexture(w,h)

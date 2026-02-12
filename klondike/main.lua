@@ -806,8 +806,8 @@ function love.draw()
             love.graphics.setColor(1,1,1)
             love.graphics.draw(backTex, sx, sy)
         else
-            love.graphics.setColor(0.2,0.2,0.2)
-            love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
+            --love.graphics.setColor(0.2,0.2,0.2)
+            --love.graphics.rectangle("fill", sx, sy, CARD_W, CARD_H)
             love.graphics.setColor(1, 1, 1)
             love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
         end
