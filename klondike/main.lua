@@ -358,6 +358,7 @@ local function checkAndSetWin()
 end
 
 function love.load()
+    love.graphics.setDefaultFilter("nearest", "nearest")
     fonts.small = love.graphics.newFont(14)
     fonts.big = love.graphics.newFont(20)
 
