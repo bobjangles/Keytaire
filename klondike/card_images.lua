@@ -21,7 +21,7 @@ end
 local function loadRawImage(path)
 	local ok, img = pcall(love.graphics.newImage,path)
 	if ok and img then
-		img:setFilter("nearest","nearest")
+		img:setFilter("linear","linear",8)
 		return img
 	else
 		print("[card_images] Warning: could not load '" .. path .. "'")
@@ -47,51 +47,21 @@ function ImageCache.getBackImage()
 	return _rawCache["back"]
 end
 
--- start Canvas scaling
-
-local function getScaledTexture(rawImg, w, h)
-    -- Create a unique cache key
-    local key = tostring(rawImg) .. "_" .. w .. "x" .. h
-    if _canvasCache[key] then return _canvasCache[key] end
-
-    -- Build a canvas of the target size
-    local canvas = love.graphics.newCanvas(w, h)
-    love.graphics.setCanvas(canvas)
-    love.graphics.clear()
-    -- Draw the raw image stretched to the canvas size
-    love.graphics.draw(
-        rawImg,
-        0, 0,
-        0,
-        w / rawImg:getWidth(),
-        h / rawImg:getHeight()
-    )
-    love.graphics.setCanvas()   -- restore default render target
-
-    -- Turn the canvas into a regular Image (so callers can treat it like any other texture)
-    local imageData = canvas:newImageData()
-    local tex = love.graphics.newImage(imageData)
-    tex:setFilter("nearest", "nearest")
-    _canvasCache[key] = tex
-    return tex
-end
-
 -- Scaled card texture
 
-function ImageCache.getCardTexture(rank, suit, w, h)
-	w = w or 100
-	h = h or 140
-	local raw = ImageCache.getCardImage(rank,suit)
-	if not raw then return nil end
-	return getScaledTexture(raw, w, h)
+function ImageCache.getCardImage(rank, suit)
+    local key = rank .. suit
+	if not _rawCache[key] then
+        _rawCache[key] = loadRawImage(getImagePath(rank,suit))
+    end
+    return _rawCache[key]
 end
 
-function ImageCache.getBackTexture(w, h)
-	w = w or 100
-	h = h or 140
-	local raw = ImageCache.getBackImage()
-	if not raw then return nil end
-	return getScaledTexture(raw, w, h)
+function ImageCache.getBackImage()
+	if not _rawCache["back"] then
+        _rawCache["back"] = loadRawImage("PNG/Self/card_back.png")
+    end
+	return _rawCache["back"]
 end
 
 return ImageCache

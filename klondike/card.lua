@@ -18,38 +18,29 @@ function Card.new(rankIndex, suitIndex)
 end
 
 function Card:draw(x, y, w, h, font)
-
     love.graphics.setColor(1,1,1,1) -- reset colour and opacity
 
     if not self.faceUp then
-        -- Draw card back image
-        local backTex = ImageCache.getBackTexture(w,h)
-        if backTex then
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(backTex, x, y)
-        else
-            -- Fallback to drawn back
-           -- love.graphics.setColor(0.2, 0.2, 0.6)
-           -- love.graphics.rectangle("fill", x, y, w, h, 6)
-	       -- love.graphics.setColor(0.15,0.15,0.4)
-	       -- love.graphics.rectangle("line", x, y, w, h, 6)
-        end
+        tex = ImageCache.getBackImage()
     else
-        -- Draw card face image
-        local tex = ImageCache.getCardTexture(self.rank, self.suit, w, h)
-        if tex then
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(tex, x, y)
-        else
+        tex = ImageCache.getCardImage(self.rank, self.suit)
+    end
+
+    if tex then
+
+        local sx = w / tex:getWidth()
+        local sy = h / tex:getHeight()
+        love.graphics.draw(tex, x, y, 0, sx, sy)
+    else
             -- Fallback to drawn card
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.rectangle("fill", x, y, w, h, 6, 6)
-            love.graphics.setColor(0, 0, 0)
-            love.graphics.rectangle("line", x, y, w, h, 6, 6)
-            love.graphics.setFont(font)
-            love.graphics.setColor(unpack(self.color))
-            love.graphics.print(self.rank .. self.suit, x + 8, y + 6)
-        end
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("fill", x, y, w, h, 6, 6)
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.rectangle("line", x, y, w, h, 6, 6)
+        love.graphics.setFont(font)
+        love.graphics.setColor(unpack(self.color))
+        love.graphics.print(self.rank .. self.suit, x + 8, y + 6)
+        
     end
 end
 
