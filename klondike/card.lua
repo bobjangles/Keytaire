@@ -2,6 +2,7 @@ local Card = {}
 Card.__index = Card
 
 local ImageCache = require "card_images"
+local Shaders = require "shaders"
 
 local ranks = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" }
 local suits = { "s", "h", "d", "c" }
@@ -17,31 +18,26 @@ function Card.new(rankIndex, suitIndex)
     return self
 end
 
-function Card:draw(x, y, w, h, font)
+function Card:draw(x, y, w, h, isSelected)
     love.graphics.setColor(1,1,1,1) -- reset colour and opacity
 
-    if not self.faceUp then
-        tex = ImageCache.getBackImage()
-    else
-        tex = ImageCache.getCardImage(self.rank, self.suit)
-    end
+    local tex = self.faceUp and ImageCache.getCardImage(self.rank, self.suit) or ImageCache.getBackImage()
 
-    if tex then
+    if not tex then return end
 
-        local sx = w / tex:getWidth()
-        local sy = h / tex:getHeight()
-        love.graphics.draw(tex, x, y, 0, sx, sy)
-    else
-            -- Fallback to drawn card
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("fill", x, y, w, h, 6, 6)
-        love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("line", x, y, w, h, 6, 6)
-        love.graphics.setFont(font)
-        love.graphics.setColor(unpack(self.color))
-        love.graphics.print(self.rank .. self.suit, x + 8, y + 6)
+    local sx = w / tex:getWidth()
+    local sy = h / tex:getHeight()
+    local offset = isSelected and 8 or 3
+
+    -- Shadow
+    love.graphics.setShader(Shaders.dropShadow)
+    love.graphics.draw(tex, x + offset, y + offset, 0, sx, sy)
+    love.graphics.setShader()
+    
+    -- Card
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(tex, x, y, 0, sx, sy)
         
-    end
 end
 
 function Card:rank()

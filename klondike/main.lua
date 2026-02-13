@@ -787,6 +787,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    local Shaders = require "shaders"
     -- draw background image if available, otherwise fall back to the solid color
     if bgImage then
         local w, h = love.graphics.getDimensions()
@@ -804,13 +805,17 @@ function love.draw()
     if #state.stock > 0 then
         local backImg = ImageCache.getBackImage()
         if backImg then
-            love.graphics.setColor(1,1,1)
+            -- unsure why removing this for now: love.graphics.setColor(1,1,1)
             local scaleX = CARD_W / backImg:getWidth()
             local scaley =  CARD_H / backImg:getHeight()
-            love.graphics.draw(backImg, sx, sy, 0, scaleX, scaleY)
-        else
+            -- Shadow
+            love.graphics.setShader(Shaders.dropShadow)
+            love.graphics.draw(backImg, sx+3 , sy+3 , 0, scaleX, scaleY)
+            love.graphics.setShader()
+            -- Pile
             love.graphics.setColor(1, 1, 1)
-            love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H)
+            love.graphics.draw(backImg, sx, sy, 0, scaleX, scaleY)
+
         end
     else
         love.graphics.setColor(0.2,0.2,0.2)
