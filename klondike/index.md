@@ -1,10 +1,15 @@
 ## Index of main.lua
 
+## Improvements
 
-cursor settings most relevant at 819
+* Better cards
+    * Aiming for more stylized
+    * art for face cards
 
+* Clear background image
 
-## Goals
-want to find where the images for cards are used, and import card_w and card_h from there
+* Menu with resolution control, game control. 
 
+* Win animation
 
+* Win-only seeds
