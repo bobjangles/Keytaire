@@ -5,7 +5,10 @@ local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
 local Shaders = require "shaders"
+local TLfres = require "tlfres" 
 
+local GAME_W = 1280
+local GAME_H = 720
 local CARD_W = 100
 local CARD_H = 140
 local PADDING = 20
@@ -786,6 +789,8 @@ function love.update(dt)
 end
 
 function love.draw()
+    -- TLfres scaling
+    TLfres.beginRendering(GAME_W, GAME_H)
     -- 1. Background
     if bgImage then
         local w, h = love.graphics.getDimensions()
@@ -906,4 +911,6 @@ function love.draw()
         love.graphics.rectangle("line", cx - 4, cy - 4, CARD_W + 8, CARD_H + 8, 8)
         love.graphics.setLineWidth(1)
     end
+
+    TLfres.endRendering()
 end
