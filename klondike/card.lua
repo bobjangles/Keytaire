@@ -15,6 +15,8 @@ function Card.new(rankIndex, suitIndex)
     self.suit = suits[suitIndex]
     self.faceUp = false
     self.color = (suitIndex == 2 or suitIndex == 3) and {1,0,0} or {0,0,0}
+    self.x = nil -- Current screen X
+    self.y = nil -- Current screen Y
     return self
 end
 
@@ -38,6 +40,19 @@ function Card:draw(x, y, w, h, isSelected)
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(tex, x, y, 0, sx, sy)
         
+end
+
+function Card:update(dt, targetX, targetY)
+    local speed = 15
+    -- if X or Y is nil, snap to target instantly for the first frame
+    if self.x == nil or self.y == nil then
+        self.x = targetX
+        self.y = targetY
+        return
+    end
+
+    self.x = self.x + (targetX - self.x) * speed * dt
+    self.y = self.y + (targetY - self.y) * speed * dt
 end
 
 function Card:rank()

@@ -4,6 +4,7 @@ local Card = require "card"
 local Input = require "input"
 local ImageCache = require "card_images"
 local Undo = require "undo"
+local Shaders = require "shaders"
 
 local CARD_W = 100
 local CARD_H = 140
@@ -21,8 +22,6 @@ local bgImage = nil
 local cursor = {
     area = "stock", -- "stock","waste","foundation","tableau"
     index = 1, -- for foundation (1..4) or tableau (1..7)
-    -- when area == "tableau", cardIndex is the index among face-up cards (1..nFaceUp).
-    -- If cardIndex == 0, there are no face-up cards in that pile (navigation ignores them).
     cardIndex = 0,
 }
 
@@ -787,8 +786,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    local Shaders = require "shaders"
-    -- draw background image if available, otherwise fall back to the solid color
+    -- 1. Background
     if bgImage then
         local w, h = love.graphics.getDimensions()
         local iw, ih = bgImage:getWidth(), bgImage:getHeight()
@@ -799,128 +797,113 @@ function love.draw()
         love.graphics.clear(0.12, 0.6, 0.2)
     end
 
+    local dt = love.timer.getDelta()
 
-    -- Draw stock
+    -- 2. Draw Stock
     local sx, sy = cursorToXY("stock", 1)
-    if #state.stock > 0 then
-        local backImg = ImageCache.getBackImage()
-        if backImg then
-            -- unsure why removing this for now: love.graphics.setColor(1,1,1)
-            local scaleX = CARD_W / backImg:getWidth()
-            local scaley =  CARD_H / backImg:getHeight()
-            -- Shadow
-            love.graphics.setShader(Shaders.dropShadow)
-            love.graphics.draw(backImg, sx+3 , sy+3 , 0, scaleX, scaleY)
-            love.graphics.setShader()
-            -- Pile
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(backImg, sx, sy, 0, scaleX, scaleY)
-
-        end
-    else
-        love.graphics.setColor(0.2,0.2,0.2)
+    if #state.stock == 0 then
+        love.graphics.setColor(0.18, 0.18, 0.18)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
-        drawTextCentered("Empty", sx, sy+CARD_H/2-8, CARD_W)
-    end
-    -- highlight cursor
-    if cursor.area == "stock" then
-        love.graphics.setColor(1,1,0,0.9)
-        love.graphics.setLineWidth(3)
-        love.graphics.rectangle("line", sx-4, sy-4, CARD_W+8, CARD_H+8, 8)
-        love.graphics.setLineWidth(1)
-    end
-
-    -- Draw waste
-    local wx, wy = cursorToXY("waste", 1)
-    if #state.waste > 0 then
-        local top = getTopOfPile(state.waste)
-        top:draw(wx,wy,CARD_W,CARD_H, fonts.small)
+        drawTextCentered("Empty", sx, sy + CARD_H/2 - 8, CARD_W)
     else
-        love.graphics.setColor(0.18,0.18,0.18)
-        love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
-        drawTextCentered("Waste", wx, wy+CARD_H/2-8, CARD_W)
-    end
-    if cursor.area == "waste" then
-        love.graphics.setColor(1,1,0,0.9)
-        love.graphics.rectangle("line", wx-4, wy-4, CARD_W+8, CARD_H+8, 8)
+        for _, card in ipairs(state.stock) do
+            card:update(dt, sx, sy)
+        end
+        -- Only draw the top card of the stock for performance
+        state.stock[#state.stock]:draw(state.stock[#state.stock].x, state.stock[#state.stock].y, CARD_W, CARD_H)
     end
 
-    -- Foundations
-    for i=1,4 do
+    -- 3. Draw Waste
+    local wx, wy = cursorToXY("waste", 1)
+    if #state.waste == 0 then
+        love.graphics.setColor(0.18, 0.18, 0.18)
+        love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
+        drawTextCentered("Waste", wx, wy + CARD_H/2 - 8, CARD_W)
+    else
+        for i, card in ipairs(state.waste) do
+            card:update(dt, wx, wy)
+            -- Only draw the top card
+            if i == #state.waste then
+                card:draw(card.x, card.y, CARD_W, CARD_H)
+            end
+        end
+    end
+
+    -- 4. Draw Foundations
+    for i = 1, 4 do
         local fx, fy = cursorToXY("foundation", i)
         local pile = state.foundations[i]
-        if #pile > 0 then
-            getTopOfPile(pile):draw(fx,fy,CARD_W,CARD_H, fonts.small)
-        else
-            love.graphics.setColor(0.18,0.18,0.18)
+        if #pile == 0 then
+            love.graphics.setColor(0.18, 0.18, 0.18)
             love.graphics.rectangle("line", fx, fy, CARD_W, CARD_H, 6)
-            drawTextCentered("Foundation", fx, fy+CARD_H/2-8, CARD_W)
-        end
-        if cursor.area == "foundation" and cursor.index == i then
-            love.graphics.setColor(1,1,0,0.9)
-            love.graphics.rectangle("line", fx-4, fy-4, CARD_W+8, CARD_H+8, 8)
+            drawTextCentered("Base", fx, fy + CARD_H/2 - 8, CARD_W)
+        else
+            for _, card in ipairs(pile) do
+                card:update(dt, fx, fy)
+            end
+            -- Draw only the top card of the foundation
+            pile[#pile]:draw(pile[#pile].x, pile[#pile].y, CARD_W, CARD_H)
         end
     end
 
-    -- Draw tableau
-    for i=1,7 do
+    -- 5. Draw Tableau (Unified Logic)
+    for i = 1, 7 do
         local tx, ty = cursorToXY("tableau", i)
         local pile = state.tableau[i]
+        
         if #pile == 0 then
-            love.graphics.setColor(0.18,0.18,0.18)
+            love.graphics.setColor(0.18, 0.18, 0.18)
             love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
-            drawTextCentered("Empty", tx, ty+CARD_W/2-8, CARD_W)
+            drawTextCentered("Empty", tx, ty + CARD_H/2 - 8, CARD_W)
         else
-            for j=1,#pile do
-                local c = pile[j]
-                local drawY = ty + (j-1)*20
-                c:draw(tx, drawY, CARD_W, CARD_H, fonts.small)
+            for j, card in ipairs(pile) do
+                local targetY = ty + (j - 1) * 20
+                card:update(dt, tx, targetY)
+                card:draw(card.x, card.y, CARD_W, CARD_H)
             end
         end
 
-        -- highlight entire pile when cursor over it
+        -- Cursor Highlighting
         if cursor.area == "tableau" and cursor.index == i then
-            love.graphics.setColor(1,1,0,0.3)
-            love.graphics.rectangle("line", tx-4, ty-4, CARD_W, CARD_H+8 + math.max(0,(#pile-1)*20), 8)
+            love.graphics.setColor(1, 1, 0, 0.2)
+            local pileHeight = CARD_H + math.max(0, (#pile - 1) * 20)
+            love.graphics.rectangle("line", tx - 4, ty - 4, CARD_W + 8, pileHeight + 8, 8)
 
-            -- highlight the current targeted face-up card and cards underneath
             local nFaceUp = faceUpCount(pile)
             if nFaceUp > 0 and cursor.cardIndex > 0 then
                 local absIndex = faceUpPosToAbsolute(pile, cursor.cardIndex)
                 if absIndex then
-                    local startY = ty + (absIndex-1)*20
-                    local height = CARD_H + (#pile - absIndex) * 20
-                    love.graphics.setColor(1,1,0,0.9)
-                    love.graphics.rectangle("line", tx-4, startY-4, CARD_W+8, height+8, 8)
+                    local cardAtCursor = pile[absIndex]
+                    local highlightY = cardAtCursor.y -- Follows animated card
+                    local selectionHeight = CARD_H + (#pile - absIndex) * 20
+                    love.graphics.setColor(1, 1, 0, 0.9)
+                    love.graphics.setLineWidth(3)
+                    love.graphics.rectangle("line", tx - 6, highlightY - 6, CARD_W + 12, selectionHeight + 12, 8)
+                    love.graphics.setLineWidth(1)
                 end
             end
         end
     end
 
-    -- Draw selected cards in bottom-left
+    -- 6. Draw Selected Stack
     if selected then
-        -- small label above the drawn stack
         local sx = UI_LEFT
-        local margin_bottom = 20
         local screen_h = love.graphics.getHeight()
-        local start_y = screen_h - CARD_H - margin_bottom
-        love.graphics.setFont(fonts.small)
-        love.graphics.setColor(1,1,1)
-        love.graphics.print("Selected: "..#selected.cards.." card(s)", sx, start_y - 18)
-        drawSelectedAtBottomLeft()
+        local start_y = screen_h - CARD_H - 20
+        
+        for i, card in ipairs(selected.cards) do
+            local targetY = start_y + (i-1)*20
+            card:update(dt, sx, targetY)
+            card:draw(card.x, card.y, CARD_W, CARD_H, true) -- true for selection shadow
+        end
     end
 
-
-    -- Win message (centered) while timer > 0
-    if state.win and state.winTimer and state.winTimer > 0 then
-        love.graphics.setFont(fonts.big)
-        local msg = state.winMessage or "You win!"
-        local w = love.graphics.getWidth()
-        local h = love.graphics.getHeight()
-        local tw = fonts.big:getWidth(msg)
-        love.graphics.setColor(0,0,0,0.6)
-        love.graphics.rectangle("fill", (w - tw)/2 - 20, 60 - 10, tw + 40, 50, 8)
-        love.graphics.setColor(1,1,1)
-        love.graphics.printf(msg, 0, 60, w, "center")
+    -- 7. Global Cursor (Non-Tableau)
+    if cursor.area ~= "tableau" then
+        local cx, cy = cursorToXY(cursor.area, cursor.index)
+        love.graphics.setColor(1, 1, 0, 0.9)
+        love.graphics.setLineWidth(3)
+        love.graphics.rectangle("line", cx - 4, cy - 4, CARD_W + 8, CARD_H + 8, 8)
+        love.graphics.setLineWidth(1)
     end
 end
