@@ -792,15 +792,9 @@ function love.draw()
     -- TLfres scaling
     TLfres.beginRendering(GAME_W, GAME_H)
     -- 1. Background
-    if bgImage then
-        local w, h = love.graphics.getDimensions()
-        local iw, ih = bgImage:getWidth(), bgImage:getHeight()
-        local sx, sy = w / iw, h / ih
-        love.graphics.setColor(1,1,1)
-        love.graphics.draw(bgImage, 0, 0, 0, sx, sy)
-    else
-        love.graphics.clear(0.12, 0.6, 0.2)
-    end
+    love.graphics.setShader(Shaders.feltGradient)
+    love.graphics.rectangle("fill", 0, 0, 1280, 720)
+    love.graphics.setShader()
 
     local dt = love.timer.getDelta()
 
