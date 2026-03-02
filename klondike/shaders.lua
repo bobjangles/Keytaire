@@ -9,17 +9,21 @@ Shaders.dropShadow = love.graphics.newShader[[
 
 Shaders.feltGradient = love.graphics.newShader[[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-        // Calculate distance from center (0.5, 0.5)
+        // 1. Sample the actual fabric image pixels
+        vec4 texColor = Texel(texture, texture_coords);
+        
+        // 2. Calculate your gradient distance
         float dist = distance(texture_coords, vec2(0.5, 0.5));
         
-        // Colors: Center (Bright Green) to Edges (Dark Hunter Green)
+        // 3. Define your green tones
         vec3 centerColor = vec3(0.05, 0.35, 0.15); 
         vec3 edgeColor = vec3(0.01, 0.12, 0.04);
-        
-        // Smoothly mix the colors based on distance
-        vec3 finalColor = mix(centerColor, edgeColor, dist * 1.2);
-        
-        return vec4(finalColor, 1.0);
+        vec3 gradient = mix(centerColor, edgeColor, dist * 1.2);
+        vec3 tinted = texColor.rgb * gradient;
+
+        // 4. Multiply the fabric texture by the green gradient
+        // This tints the image while keeping its details
+        return vec4(mix(tinted, texColor.rgb,0.3), texColor.a);
     }
 ]]
 

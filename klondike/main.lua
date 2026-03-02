@@ -791,9 +791,14 @@ end
 function love.draw()
     -- TLfres scaling
     TLfres.beginRendering(GAME_W, GAME_H)
+
     -- 1. Background
     love.graphics.setShader(Shaders.feltGradient)
+    if bgImage then
+        love.graphics.draw(bgImage,0,0,0, GAME_W / bgImage:getWidth(), GAME_H / bgImage:getHeight())
+    else
     love.graphics.rectangle("fill", 0, 0, 1280, 720)
+    end
     love.graphics.setShader()
 
     local dt = love.timer.getDelta()
