@@ -21,9 +21,7 @@ What this prototype includes
 - Selection and moving of face-up card sequences from tableau, single-card moves to foundations.
 - Simple rendering (no external assets).
 
-Notes / Improvements
-- This is a prototype focusing on navigation and core moves. Rules and visuals can be improved.
-- Undo, scoring, and complete rule validation (e.g., multiple-card moves only when correctly alternating) are minimal but can be extended.
-- Textures will be added at a later date
-
+To-do List
+- Update face card with own pixelart
+- Fix "hand" when fullscreen
 This project was made with contributions from GitHub Copilot AI
