@@ -1,7 +1,6 @@
 -- Caches loaded card images to avoid reloading
 local ImageCache = {}
-local _rawCache = {}  --raw PNG textures
-local _canvasCache = {} -- scaled canvases turned into textures
+local _rawCache = {}  -- raw PNG textures
 
 -- Normalize image filenames
 local function getImagePath(rank, suit)
@@ -17,9 +16,8 @@ local function getImagePath(rank, suit)
 end
 
 -- returning a raw image
-
 local function loadRawImage(path)
-	local ok, img = pcall(love.graphics.newImage,path)
+	local ok, img = pcall(love.graphics.newImage, path)
 	if ok and img then
 		img:setFilter("linear","linear",8)
 		return img
@@ -29,26 +27,7 @@ local function loadRawImage(path)
 	end
 end
 
--- raw texture (fallback)
-
-function ImageCache.getCardImage(rank, suit)
-    local key = rank .. suit
-    if not _rawCache[key] then
-        _rawCache[key] = loadRawImage(getImagePath(rank, suit))
-    end
-    return _rawCache[key]
-end
-
-
-function ImageCache.getBackImage()
-    if not _rawCache["back"] then
-	    _rawCache["back"] = loadRawImage("PNG/Self/card_back.png")
-	end
-	return _rawCache["back"]
-end
-
--- Scaled card texture
-
+-- Scaled card texture (Primary)
 function ImageCache.getCardImage(rank, suit)
     local key = rank .. suit
 	if not _rawCache[key] then

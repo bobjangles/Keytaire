@@ -15,13 +15,13 @@ function Card.new(rankIndex, suitIndex)
     self.suit = suits[suitIndex]
     self.faceUp = false
     self.color = (suitIndex == 2 or suitIndex == 3) and {1,0,0} or {0,0,0}
-    self.x = nil -- Current screen X
-    self.y = nil -- Current screen Y
+    self.x = nil 
+    self.y = nil 
     return self
 end
 
 function Card:draw(x, y, w, h, isSelected)
-    love.graphics.setColor(1,1,1,1) -- reset colour and opacity
+    love.graphics.setColor(1,1,1,1)
 
     local tex = self.faceUp and ImageCache.getCardImage(self.rank, self.suit) or ImageCache.getBackImage()
 
@@ -39,11 +39,9 @@ function Card:draw(x, y, w, h, isSelected)
     -- Card
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(tex, x, y, 0, sx, sy)
-        
 end
 
 function Card:update(dt, targetX, targetY)
-    local speed = 15
     -- if X or Y is nil, snap to target instantly for the first frame
     if self.x == nil or self.y == nil then
         self.x = targetX
@@ -51,20 +49,23 @@ function Card:update(dt, targetX, targetY)
         return
     end
 
-    self.x = self.x + (targetX - self.x) * speed * dt
-    self.y = self.y + (targetY - self.y) * speed * dt
+    -- Snappier animation speed
+    local speed = 25
+    local dx = targetX - self.x
+    local dy = targetY - self.y
+
+    -- Snap into place to stop micro-jitter when very close
+    if math.abs(dx) < 0.5 and math.abs(dy) < 0.5 then
+        self.x = targetX
+        self.y = targetY
+    else
+        self.x = self.x + dx * speed * dt
+        self.y = self.y + dy * speed * dt
+    end
 end
 
-function Card:rank()
-    return self.rankIndex
-end
-
-function Card:suit()
-    return self.suitIndex
-end
-
-function Card:isRed()
-    return (self.suitIndex == 2 or self.suitIndex == 3)
-end
+function Card:rank() return self.rankIndex end
+function Card:suit() return self.suitIndex end
+function Card:isRed() return (self.suitIndex == 2 or self.suitIndex == 3) end
 
 return Card

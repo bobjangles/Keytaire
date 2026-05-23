@@ -1,4 +1,4 @@
--- (updated main.lua with undo/redo selection/move fix)
+-- (updated main.lua with fullscreen toggle and coordinate fixes)
 local Deck = require "deck"
 local Card = require "card"
 local Input = require "input"
@@ -400,7 +400,10 @@ local function drawSelectedAtBottomLeft()
     if not selected then return end
     local x = UI_LEFT
     local margin_bottom = 20
-    local screen_h = love.graphics.getHeight()
+    
+    -- FIX: Use virtual height instead of physical window height
+    local screen_h = GAME_H 
+    
     -- start so cards sit above the bottom margin
     local start_y = screen_h - CARD_H - margin_bottom
     for i=1,#selected.cards do
@@ -454,6 +457,14 @@ local function moveToBottomRow()
 end
 
 function love.keypressed(key)
+    
+    -- NEW: Fullscreen Toggle on F11
+    if key == "f11" then
+        local isFullscreen = love.window.getFullscreen()
+        love.window.setFullscreen(not isFullscreen, "desktop")
+        return
+    end
+
     local now = love.timer.getTime()
 
     -- 1) Handle uppercase G (Shift+g) -> bottom row
@@ -892,7 +903,10 @@ function love.draw()
     -- 6. Draw Selected Stack
     if selected then
         local sx = UI_LEFT
-        local screen_h = love.graphics.getHeight()
+        
+        -- FIX: Use the virtual game height instead of the physical window height
+        local screen_h = GAME_H 
+        
         local start_y = screen_h - CARD_H - 20
         
         for i, card in ipairs(selected.cards) do
