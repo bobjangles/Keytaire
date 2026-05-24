@@ -1,6 +1,6 @@
 -- NOTE: To change your physical audio file paths, open `audio_manager.lua` 
 -- and update the `soundFiles` table inside the `AudioManager.init()` function.
--- The keys ("place1", "place2", "slide1", "slide8", "shove") are used below to trigger them.
+-- The keys ("place1", "place2", "slide1", "slide8", "pack_open") are used below to trigger them.
 
 local AudioManager = require "audio_manager"
 local Deck = require "deck"
@@ -427,7 +427,7 @@ function love.keypressed(key)
             if cursor.area == "tableau" then
                 if faceUpCount(state.tableau[cursor.index]) == 0 then 
                     undo:undo(state)
-                    AudioManager.play("shove") -- AUDIO: Tried to pick up empty/facedown pile
+                    AudioManager.play("pack_open") -- AUDIO: Tried to pick up empty/facedown pile
                     return 
                 end
                 selected = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
@@ -435,7 +435,7 @@ function love.keypressed(key)
                 selected = pickupFromPile(cursor.area, cursor.index)
                 if not selected then 
                     undo:undo(state)
-                    AudioManager.play("shove") -- AUDIO: Tried to pick up empty pile
+                    AudioManager.play("pack_open") -- AUDIO: Tried to pick up empty pile
                 end
             end
             if selected then AudioManager.play("slide1") end -- AUDIO: Successfully picked up card(s)
@@ -455,7 +455,7 @@ function love.keypressed(key)
                     for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
                 end
                 selected = nil
-                AudioManager.play("shove") -- AUDIO: Invalid move, sent back
+                AudioManager.play("pack_open") -- AUDIO: Invalid move, sent back
             end
         else
             if cursor.area == "stock" then
@@ -480,7 +480,7 @@ function love.keypressed(key)
                     if not moved then
                         for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
                         undo:undo(state)
-                        AudioManager.play("shove") -- AUDIO: Auto-move rejected (no valid foundation)
+                        AudioManager.play("pack_open") -- AUDIO: Auto-move rejected (no valid foundation)
                     else
                         flipOriginIfNeeded(p); checkAndSetWin()
                         AudioManager.play("place2") -- AUDIO: Auto-moved single card to foundation
@@ -488,10 +488,10 @@ function love.keypressed(key)
                 elseif p then
                     for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
                     undo:undo(state)
-                    AudioManager.play("shove") -- AUDIO: Can't auto-move a stack to foundation
+                    AudioManager.play("pack_open") -- AUDIO: Can't auto-move a stack to foundation
                 else
                     undo:undo(state)
-                    AudioManager.play("shove")
+                    AudioManager.play("pack_open")
                 end
             elseif cursor.area == "waste" then
                 if #state.waste == 0 then return end
@@ -515,7 +515,7 @@ function love.keypressed(key)
                     end
                     if not moved then 
                         undo:undo(state)
-                        AudioManager.play("shove") -- AUDIO: Waste card had nowhere to go
+                        AudioManager.play("pack_open") -- AUDIO: Waste card had nowhere to go
                     else 
                         checkAndSetWin()
                         AudioManager.play("place2") -- AUDIO: Waste card found a home
@@ -541,7 +541,7 @@ function love.keypressed(key)
                     return
                 end
             end
-            AudioManager.play("shove") -- AUDIO: Autofound failed to place card
+            AudioManager.play("pack_open") -- AUDIO: Autofound failed to place card
         end
     end
 end

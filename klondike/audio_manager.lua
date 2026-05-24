@@ -9,11 +9,12 @@ function AudioManager.init()
     -- Map logical action keys to your physical audio assets
     -- (You can change or add filenames here yourself whenever you want)
     local soundFiles = {
-        place1 = "Audio/card-place-1.wav",
+        place1 = "Audio/card-place-3.wav",
         place2 = "Audio/card-place-2.wav",
         slide1 = "Audio/card-slide-1.wav",
-        slide8 = "Audio/card-slide-8.wav",
+        slide8 = "Audio/card-slide-4.wav",
         shove  = "Audio/card-shove-3.wav",
+        pack_open = "Audio/cards-pack-open-1.wav"
     }
 
     for key, path in pairs(soundFiles) do
