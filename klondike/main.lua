@@ -1,3 +1,8 @@
+-- NOTE: To change your physical audio file paths, open `audio_manager.lua` 
+-- and update the `soundFiles` table inside the `AudioManager.init()` function.
+-- The keys ("place1", "place2", "slide1", "slide8", "shove") are used below to trigger them.
+
+local AudioManager = require "audio_manager"
 local Deck = require "deck"
 local Card = require "card"
 local Input = require "input"
@@ -267,6 +272,8 @@ function love.load()
     local ok, img = pcall(function() return love.graphics.newImage("PNG/Texturelabs_Fabric_184M.jpg") end)
     if ok and img then bgImage = img else bgImage = nil end
 
+    AudioManager.init()
+
     newGame()
 end
 
@@ -348,11 +355,17 @@ function love.keypressed(key)
     -- History
     if action == "undo" then
         local prev = undo:undo(state)
-        if prev then state = prev; selected = nil; clampCursor(); checkAndSetWin() end
+        if prev then 
+            state = prev; selected = nil; clampCursor(); checkAndSetWin() 
+            AudioManager.play("slide8") -- AUDIO: Satisfying rustle for undo
+        end
         return
     elseif action == "redo" then
         local nextState = undo:redo(state)
-        if nextState then state = nextState; selected = nil; clampCursor(); checkAndSetWin() end
+        if nextState then 
+            state = nextState; selected = nil; clampCursor(); checkAndSetWin()
+            AudioManager.play("slide8") -- AUDIO: Satisfying rustle for redo
+        end
         return
     end
 
@@ -408,20 +421,30 @@ function love.keypressed(key)
                 for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
             end
             selected = nil
+            AudioManager.play("place1") -- AUDIO: Putting cards back down where they came from
         else
             undo:push(state)
             if cursor.area == "tableau" then
-                if faceUpCount(state.tableau[cursor.index]) == 0 then undo:undo(state); return end
+                if faceUpCount(state.tableau[cursor.index]) == 0 then 
+                    undo:undo(state)
+                    AudioManager.play("shove") -- AUDIO: Tried to pick up empty/facedown pile
+                    return 
+                end
                 selected = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
             else
                 selected = pickupFromPile(cursor.area, cursor.index)
-                if not selected then undo:undo(state) end
+                if not selected then 
+                    undo:undo(state)
+                    AudioManager.play("shove") -- AUDIO: Tried to pick up empty pile
+                end
             end
+            if selected then AudioManager.play("slide1") end -- AUDIO: Successfully picked up card(s)
         end
     elseif action == "move" then
         if selected then
             if placeOntoPile(cursor.area, cursor.index, selected) then
                 selected = nil; checkAndSetWin()
+                AudioManager.play("place2") -- AUDIO: Successfully moved cards to new pile
             else
                 local origin = selected
                 if origin.pileType == "tableau" then
@@ -432,13 +455,19 @@ function love.keypressed(key)
                     for _,c in ipairs(origin.cards) do table.insert(state.foundations[origin.index], c) end
                 end
                 selected = nil
+                AudioManager.play("shove") -- AUDIO: Invalid move, sent back
             end
         else
             if cursor.area == "stock" then
                 undo:push(state); drawFromStock(); checkAndSetWin()
+                AudioManager.play("slide8") -- AUDIO: Draw from stock to waste
             elseif cursor.area == "tableau" then
                 undo:push(state)
-                if faceUpCount(state.tableau[cursor.index]) == 0 then undo:undo(state); return end
+                if faceUpCount(state.tableau[cursor.index]) == 0 then 
+                    undo:undo(state)
+                    AudioManager.play("shove") 
+                    return 
+                end
                 local p = pickupFromPile("tableau", cursor.index, cursor.cardIndex)
                 if p and #p.cards == 1 then
                     local moved = false
@@ -451,14 +480,18 @@ function love.keypressed(key)
                     if not moved then
                         for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
                         undo:undo(state)
+                        AudioManager.play("shove") -- AUDIO: Auto-move rejected (no valid foundation)
                     else
                         flipOriginIfNeeded(p); checkAndSetWin()
+                        AudioManager.play("place2") -- AUDIO: Auto-moved single card to foundation
                     end
                 elseif p then
                     for _,c in ipairs(p.cards) do table.insert(state.tableau[cursor.index], c) end
                     undo:undo(state)
+                    AudioManager.play("shove") -- AUDIO: Can't auto-move a stack to foundation
                 else
                     undo:undo(state)
+                    AudioManager.play("shove")
                 end
             elseif cursor.area == "waste" then
                 if #state.waste == 0 then return end
@@ -480,7 +513,13 @@ function love.keypressed(key)
                             end
                         end
                     end
-                    if not moved then undo:undo(state) else checkAndSetWin() end
+                    if not moved then 
+                        undo:undo(state)
+                        AudioManager.play("shove") -- AUDIO: Waste card had nowhere to go
+                    else 
+                        checkAndSetWin()
+                        AudioManager.play("place2") -- AUDIO: Waste card found a home
+                    end
                 else
                     undo:undo(state)
                 end
@@ -488,6 +527,7 @@ function love.keypressed(key)
         end
     elseif action == "restart" then
         newGame()
+        AudioManager.play("slide8") -- AUDIO: Shuffling the deck for a new game
     elseif action == "autofound" then
         if selected and #selected.cards == 1 then
             local card = selected.cards[1]
@@ -497,9 +537,11 @@ function love.keypressed(key)
                     flipOriginIfNeeded(selected)
                     selected = nil
                     checkAndSetWin()
+                    AudioManager.play("place2") -- AUDIO: Autofound placed card successfully
                     return
                 end
             end
+            AudioManager.play("shove") -- AUDIO: Autofound failed to place card
         end
     end
 end
