@@ -23,5 +23,6 @@ What this prototype includes
 
 To-do List
 - Update face card with own pixelart
-- Fix "hand" when fullscreen
+- better win condition animation
+
 This project was made with contributions from GitHub Copilot AI
