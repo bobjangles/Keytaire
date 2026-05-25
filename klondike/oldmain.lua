@@ -199,47 +199,75 @@ local function clampCursor()
     end
 end
 
-local function isGameSolvable()
-    -- 1. All tableau cards must be revealed (no face-down cards left)
+local function anyFaceDownInTableau()
     for i = 1, 7 do
         for j = 1, #state.tableau[i] do
-            if not state.tableau[i][j].faceUp then return false end
+            if not state.tableau[i][j].faceUp then return true end
         end
     end
-    
-    -- 2. Stock and Waste piles must be completely cleared out
-    if #state.stock > 0 or #state.waste > 0 then return false end
-    
-    -- 3. Avoid setting if the game is already completely over
-    local foundationTotal = 0
-    for i = 1, 4 do foundationTotal = foundationTotal + #state.foundations[i] end
-    if foundationTotal == 52 then return false end
+    return false
+end
 
-    return true
+local function tryMoveWasteTopToFoundation()
+    if #state.waste == 0 then return false end
+    local card = Rules.getTopOfPile(state.waste)
+    if not card then return false end
+    for i = 1, 4 do
+        if Rules.canMoveToFoundation(card, state.foundations[i]) then
+            table.insert(state.foundations[i], table.remove(state.waste))
+            return true
+        end
+    end
+    return false
+end
+
+local function tryMoveTableauTopToFoundation()
+    for i = 1, 7 do
+        local pile = state.tableau[i]
+        if #pile > 0 then
+            local top = pile[#pile]
+            if top.faceUp then
+                for f = 1, 4 do
+                    if Rules.canMoveToFoundation(top, state.foundations[f]) then
+                        table.remove(pile)
+                        table.insert(state.foundations[f], top)
+                        if #pile > 0 and not pile[#pile].faceUp then
+                            pile[#pile].faceUp = true
+                        end
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function autoMoveAllFaceUpToFoundations()
+    if anyFaceDownInTableau() then return end
+    local moved = true
+    while moved do
+        moved = false
+        if tryMoveWasteTopToFoundation() then moved = true
+        elseif tryMoveTableauTopToFoundation() then moved = true end
+    end
 end
 
 local function checkAndSetWin()
-    -- Only trigger win state if all cards are uncovered and stock/waste are clear
-    if isGameSolvable() and not state.win then
+    autoMoveAllFaceUpToFoundations()
+    local total = 0
+    for i=1,7 do total = total + #state.tableau[i] end
+    if total == 0 and not state.win then
         state.win = true
-        state.winTimer = 0 -- Timer used to space out cascading card animations
+        state.winTimer = 3.0
         state.winMessage = "You win!"
-    else
-        -- Back up check for full manual completion
-        local foundationTotal = 0
-        for i = 1, 4 do foundationTotal = foundationTotal + #state.foundations[i] end
-        if foundationTotal == 52 and not state.win then
-            state.win = true
-            state.winTimer = 0
-            state.winMessage = "You win!"
-        end
     end
 end
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     fonts.small = love.graphics.newFont(14)
-    fonts.big = love.graphics.newFont(24)
+    fonts.big = love.graphics.newFont(20)
 
     local ok, img = pcall(function() return love.graphics.newImage("PNG/Texturelabs_Fabric_184M.jpg") end)
     if ok and img then bgImage = img else bgImage = nil end
@@ -317,16 +345,6 @@ function love.keypressed(key)
     local action = Input.getAction(key, isShift, love.timer.getTime())
 
     if not action then return end
-
-    -- Allow resetting/restarting at any point (even during the cascade solve animation)
-    if action == "restart" then
-        newGame()
-        AudioManager.play("slide8") -- AUDIO: Shuffling the deck for a new game
-        return
-    end
-
-    -- Block any gameplay actions if the game is already won and animating
-    if state.win then return end
 
     -- Handle Vim Combo Motions
     if action == "bottomRow" then moveToBottomRow(); return end
@@ -497,7 +515,7 @@ function love.keypressed(key)
                     end
                     if not moved then 
                         undo:undo(state)
-                        AudioManager.play("pack_open") -- AUDIO: Permanent waste card had nowhere to go
+                        AudioManager.play("pack_open") -- AUDIO: Waste card had nowhere to go
                     else 
                         checkAndSetWin()
                         AudioManager.play("place2") -- AUDIO: Waste card found a home
@@ -507,6 +525,9 @@ function love.keypressed(key)
                 end
             end
         end
+    elseif action == "restart" then
+        newGame()
+        AudioManager.play("slide8") -- AUDIO: Shuffling the deck for a new game
     elseif action == "autofound" then
         if selected and #selected.cards == 1 then
             local card = selected.cards[1]
@@ -526,32 +547,9 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
-    -- Handle progressive auto-win sequence cascade animation
-    if state.win then
-        state.winTimer = state.winTimer + dt
-        
-        -- Control interval between consecutive card movements (0.12 seconds)
-        if state.winTimer >= 0.12 then
-            state.winTimer = 0
-            
-            local movedACard = false
-            for i = 1, 7 do
-                local pile = state.tableau[i]
-                if #pile > 0 then
-                    local topCard = pile[#pile]
-                    for f = 1, 4 do
-                        if Rules.canMoveToFoundation(topCard, state.foundations[f]) then
-                            table.remove(pile)
-                            table.insert(state.foundations[f], topCard)
-                            AudioManager.play("place2") -- Trigger sound effect per progressive flight
-                            movedACard = true
-                            break
-                        end
-                    end
-                end
-                if movedACard then break end
-            end
-        end
+    if state.win and state.winTimer > 0 then
+        state.winTimer = state.winTimer - dt
+        if state.winTimer <= 0 then state.winTimer = 0 end
     end
 end
 
@@ -571,7 +569,7 @@ function love.draw()
     -- 1. Draw Stock
     local sx, sy = cursorToXY("stock", 1)
     if #state.stock == 0 then
-        love.graphics.setColor(1, 1, 1, 0.25)
+        love.graphics.setColor(0.4, 0.4, 0.4)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
         drawTextCentered("Empty", sx, sy + CARD_H/2 - 8, CARD_W)
     else
@@ -582,7 +580,7 @@ function love.draw()
     -- 2. Draw Waste
     local wx, wy = cursorToXY("waste", 1)
     if #state.waste == 0 then
-        love.graphics.setColor(1, 1, 1, 0.25)
+        love.graphics.setColor(0.4, 0.4, 0.4)
         love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
         drawTextCentered("Waste", wx, wy + CARD_H/2 - 8, CARD_W)
     else
@@ -597,7 +595,7 @@ function love.draw()
         local fx, fy = cursorToXY("foundation", i)
         local pile = state.foundations[i]
         if #pile == 0 then
-            love.graphics.setColor(1, 1, 1, 0.25)
+            love.graphics.setColor(0.4, 0.4, 0.4)
             love.graphics.rectangle("line", fx, fy, CARD_W, CARD_H, 6)
             drawTextCentered("Base", fx, fy + CARD_H/2 - 8, CARD_W)
         else
@@ -611,7 +609,7 @@ function love.draw()
         local tx, ty = cursorToXY("tableau", i)
         local pile = state.tableau[i]
         if #pile == 0 then
-            love.graphics.setColor(1, 1, 1, 0.25)
+            love.graphics.setColor(0.4, 0.4, 0.4)
             love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
             drawTextCentered("Empty", tx, ty + CARD_H/2 - 8, CARD_W)
         else
@@ -621,7 +619,7 @@ function love.draw()
             end
         end
 
-        if cursor.area == "tableau" and cursor.index == i and not state.win then
+        if cursor.area == "tableau" and cursor.index == i then
             love.graphics.setColor(1, 1, 0, 0.2)
             love.graphics.rectangle("line", tx - 4, ty - 4, CARD_W + 8, CARD_H + math.max(0, (#pile - 1) * 20) + 8, 8)
             local nFaceUp = faceUpCount(pile)
@@ -648,8 +646,8 @@ function love.draw()
         end
     end
 
-    -- 6. Global Navigation Selection Cursor
-    if cursor.area ~= "tableau" and not state.win then
+    -- 6. Global Cursor
+    if cursor.area ~= "tableau" then
         local cx, cy = cursorToXY(cursor.area, cursor.index)
         love.graphics.setColor(1, 1, 0, 0.9)
         love.graphics.setLineWidth(3)
