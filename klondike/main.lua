@@ -569,7 +569,7 @@ function love.draw()
     -- 1. Draw Stock
     local sx, sy = cursorToXY("stock", 1)
     if #state.stock == 0 then
-        love.graphics.setColor(0.18, 0.18, 0.18)
+        love.graphics.setColor(0.4, 0.4, 0.4)
         love.graphics.rectangle("line", sx, sy, CARD_W, CARD_H, 6)
         drawTextCentered("Empty", sx, sy + CARD_H/2 - 8, CARD_W)
     else
@@ -580,7 +580,7 @@ function love.draw()
     -- 2. Draw Waste
     local wx, wy = cursorToXY("waste", 1)
     if #state.waste == 0 then
-        love.graphics.setColor(0.18, 0.18, 0.18)
+        love.graphics.setColor(0.4, 0.4, 0.4)
         love.graphics.rectangle("line", wx, wy, CARD_W, CARD_H, 6)
         drawTextCentered("Waste", wx, wy + CARD_H/2 - 8, CARD_W)
     else
@@ -595,7 +595,7 @@ function love.draw()
         local fx, fy = cursorToXY("foundation", i)
         local pile = state.foundations[i]
         if #pile == 0 then
-            love.graphics.setColor(0.18, 0.18, 0.18)
+            love.graphics.setColor(0.4, 0.4, 0.4)
             love.graphics.rectangle("line", fx, fy, CARD_W, CARD_H, 6)
             drawTextCentered("Base", fx, fy + CARD_H/2 - 8, CARD_W)
         else
@@ -609,7 +609,7 @@ function love.draw()
         local tx, ty = cursorToXY("tableau", i)
         local pile = state.tableau[i]
         if #pile == 0 then
-            love.graphics.setColor(0.18, 0.18, 0.18)
+            love.graphics.setColor(0.4, 0.4, 0.4)
             love.graphics.rectangle("line", tx, ty, CARD_W, CARD_H, 6)
             drawTextCentered("Empty", tx, ty + CARD_H/2 - 8, CARD_W)
         else
